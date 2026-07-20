@@ -1,1 +1,3 @@
-export * from './lib/config';
+export * from './constants/environments';
+export * from './environments';
+export * from './types/config.types';
