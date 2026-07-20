@@ -3,3 +3,4 @@ export * from './environments';
 export * from './types/config.types';
 export * from './loaders';
 export * from './validators';
+export * from './services';
