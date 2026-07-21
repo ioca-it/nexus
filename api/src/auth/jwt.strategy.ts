@@ -1,8 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
+import { getAppConfig } from '@nexus/config';
 
 export interface EntraJwtPayload {
   aud: string;
@@ -18,9 +18,10 @@ export interface EntraJwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(configService: ConfigService) {
-    const tenantId = configService.get<string>('auth.tenantId');
-    const audience = configService.get<string>('auth.audience');
+  constructor() {
+    const {
+      azure: { tenantId, clientId: audience },
+    } = getAppConfig();
 
     if (!tenantId || !audience) {
       throw new Error(
