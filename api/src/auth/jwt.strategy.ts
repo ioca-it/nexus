@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as jwksRsa from 'jwks-rsa';
-import { getAppConfig } from '@nexus/config';
+import { getAuthConfig } from '@nexus/config/auth';
 
 export interface EntraJwtPayload {
   aud: string;
@@ -19,11 +19,9 @@ export interface EntraJwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
-    const {
-      azure: { tenantId, clientId: audience },
-    } = getAppConfig();
+    const { tenantId, clientId } = getAuthConfig();
 
-    if (!tenantId || !audience) {
+    if (!tenantId || !clientId) {
       throw new Error(
         'Microsoft Entra ID authentication configuration is incomplete.',
       );
@@ -31,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience,
+      audience: clientId,
       issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
       algorithms: ['RS256'],
       secretOrKeyProvider: jwksRsa.passportJwtSecret({

@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "strict": false,
     "paths": {
-      "@nexus/config": ["./libs/config/src/index.ts"]
+      "@nexus/config": ["./libs/config/src/index.ts"],
+      "@nexus/config/auth": ["./libs/config/src/auth/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
