@@ -53,7 +53,7 @@ Las funcionalidades empresariales concretas de los portales y las integraciones 
 - Prefijo global, validación de entradas, CORS, filtro de excepciones, logging y Swagger en la API.
 - Endpoints básicos y health checks.
 - Validación JWT contra Microsoft Entra ID mediante issuer, audience, RS256 y JWKS.
-- Guards de autenticación y roles aplicados a un endpoint protegido.
+- Guard de autenticación disponible; la autorización por roles y su aplicación a un endpoint protegido permanecen como **Implementación futura**.
 - Infraestructura modular de Auth en `libs/config/src/auth`.
 - `JwtStrategy` desacoplada de `getAppConfig()` mediante `getAuthConfig()`.
 - Estándar oficial de módulos de configuración en `.ai/config-module-standard.md`.
@@ -65,7 +65,7 @@ Las funcionalidades empresariales concretas de los portales y las integraciones 
 
 Los siguientes elementos existen en el working tree, pero su madurez es parcial:
 
-- Autenticación y autorización backend: existe infraestructura inicial, pero no protección global ni políticas completas.
+- Autenticación backend: existe infraestructura inicial. La autorización y la protección global permanecen como **Implementación futura**.
 - Pruebas: existen suites iniciales, pero no cubren flujos empresariales.
 - Configuración: Auth ya valida únicamente `AZURE_TENANT_ID` y `AZURE_CLIENT_ID`, pero `getAppConfig()` y `NexusConfig` permanecen como compatibilidad temporal legacy.
 - Configuración: no existen todavía módulos independientes para Observability, Storage, Key Vault, Dataverse o Business Central, ni una separación completa de puntos de entrada Browser/Server.
@@ -503,7 +503,7 @@ No se definen operaciones administrativas concretas sin requisitos de negocio ap
 ### Implementación actual
 
 - API NestJS con infraestructura transversal inicial.
-- Autenticación JWT y autorización por rol parcial.
+- Autenticación JWT implementada; autorización por roles pendiente.
 - Sin módulos funcionales de dominio o integraciones empresariales.
 
 ### Implementación futura

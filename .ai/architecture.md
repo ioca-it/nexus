@@ -58,7 +58,7 @@ La arquitectura de NEXUS debe:
 - Los dos portales conservan principalmente el scaffolding inicial de Nx/Next.js.
 - La API expone endpoints básicos y un módulo de salud.
 - La API usa Passport JWT y JWKS para validar tokens de Microsoft Entra ID.
-- Existe autorización por rol aplicada a un endpoint protegido de salud.
+- La autorización por roles y su aplicación a un endpoint protegido permanecen como **Implementación futura**.
 - Existe un alias público `@nexus/config` para la librería `libs/config`.
 - Existe un módulo independiente de configuración Auth con el subpath `@nexus/config/auth`.
 - `JwtStrategy` consume `getAuthConfig()` y solo requiere `AZURE_TENANT_ID` y `AZURE_CLIENT_ID`.
@@ -361,7 +361,7 @@ La propiedad de cada dato, el orden transaccional y las reglas de sincronizació
 - Obtiene claves públicas mediante el endpoint JWKS de Microsoft.
 - Usa caché y rate limiting para solicitudes JWKS.
 - Valida la presencia de `sub` y `tid`.
-- Existe un guard JWT y un guard de roles usados en un endpoint protegido.
+- Existe un guard JWT; el guard de roles y su aplicación a un endpoint protegido permanecen como **Implementación futura**.
 - Obtiene tenant y client ID mediante `getAuthConfig()` sin depender de la configuración de integraciones no utilizadas.
 
 ### 11.2 Arquitectura propuesta
