@@ -17,3 +17,8 @@ reloj ni persistir.
 workflow. Create Draft obtiene `customerId` exclusivamente del actor. Update,
 Submit y Resubmit impiden operaciones entre clientes distintos; un actor sin
 contexto de cliente solo continúa con el permiso explícito correspondiente.
+
+Las consultas reutilizan la misma política con la acción `read`. La consulta
+por ID se compone con alcance de cliente o administrativo; el listado del
+cliente deriva siempre su `customerId` del actor y el listado administrativo
+recibe explícitamente el cliente solicitado.

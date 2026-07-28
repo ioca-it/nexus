@@ -6,6 +6,9 @@ import { Test } from '@nestjs/testing';
 import { getAppConfig, type NexusConfig } from '@nexus/config';
 import {
   CreateDraftPaymentNotificationUseCase,
+  GetPaymentNotificationByIdUseCase,
+  ListCustomerPaymentNotificationsUseCase,
+  ListPaymentNotificationsByCustomerUseCase,
   RejectPaymentNotificationUseCase,
   RequestChangesPaymentNotificationUseCase,
   ResubmitPaymentNotificationUseCase,
@@ -39,7 +42,16 @@ import {
 } from '../dataverse/dataverse.providers';
 import { PaymentNotificationsModule } from './payment-notifications.module';
 import {
+  AdminPaymentNotificationsController,
+  PaymentNotificationsController,
+} from './controllers';
+import {
+  adminGetPaymentNotificationByIdUseCaseProviderDefinition,
+  adminListPaymentNotificationsByCustomerUseCaseProviderDefinition,
   createDraftPaymentNotificationUseCaseProviderDefinition,
+  getPaymentNotificationByIdUseCaseProviderDefinition,
+  listCustomerPaymentNotificationsUseCaseProviderDefinition,
+  paymentNotificationIdGeneratorProviderDefinition,
   paymentNotificationRepositoryProviderDefinition,
   paymentNotificationStateTransitionProviderDefinition,
   rejectPaymentNotificationUseCaseProviderDefinition,
@@ -51,8 +63,13 @@ import {
   validatePaymentNotificationUseCaseProviderDefinition,
 } from './payment-notifications.providers';
 import {
+  ADMIN_GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  ADMIN_LIST_PAYMENT_NOTIFICATIONS_BY_CUSTOMER_USE_CASE,
   CREATE_DRAFT_PAYMENT_NOTIFICATION_USE_CASE,
+  GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  LIST_CUSTOMER_PAYMENT_NOTIFICATIONS_USE_CASE,
   PAYMENT_NOTIFICATION_CLOCK,
+  PAYMENT_NOTIFICATION_ID_GENERATOR,
   PAYMENT_NOTIFICATION_REPOSITORY,
   PAYMENT_NOTIFICATION_STATE_TRANSITION,
   REJECT_PAYMENT_NOTIFICATION_USE_CASE,
@@ -62,6 +79,7 @@ import {
   SUBMIT_PAYMENT_NOTIFICATION_USE_CASE,
   UPDATE_PAYMENT_NOTIFICATION_USE_CASE,
   VALIDATE_PAYMENT_NOTIFICATION_USE_CASE,
+  type PaymentNotificationIdGenerator,
 } from './payment-notifications.tokens';
 
 jest.mock('@nexus/config', () => ({
@@ -75,6 +93,9 @@ jest.mock('@nexus/platform', () => ({
 }));
 
 jest.mock('@nexus/modules/payment-notifications', () => ({
+  GetPaymentNotificationByIdUseCase: jest.fn(),
+  ListCustomerPaymentNotificationsUseCase: jest.fn(),
+  ListPaymentNotificationsByCustomerUseCase: jest.fn(),
   CreateDraftPaymentNotificationUseCase: jest.fn(),
   UpdatePaymentNotificationUseCase: jest.fn(),
   SubmitPaymentNotificationUseCase: jest.fn(),
@@ -181,6 +202,13 @@ const useCaseTokens = [
   RESUBMIT_PAYMENT_NOTIFICATION_USE_CASE,
 ] as const;
 
+const queryUseCaseTokens = [
+  GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  LIST_CUSTOMER_PAYMENT_NOTIFICATIONS_USE_CASE,
+  ADMIN_GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  ADMIN_LIST_PAYMENT_NOTIFICATIONS_BY_CUSTOMER_USE_CASE,
+] as const;
+
 const useCaseConstructors = [
   CreateDraftPaymentNotificationUseCase,
   UpdatePaymentNotificationUseCase,
@@ -259,8 +287,10 @@ describe('Payment Notifications providers', () => {
     const tokens = [
       PAYMENT_NOTIFICATION_REPOSITORY,
       PAYMENT_NOTIFICATION_CLOCK,
+      PAYMENT_NOTIFICATION_ID_GENERATOR,
       PAYMENT_NOTIFICATION_STATE_TRANSITION,
       ...useCaseTokens,
+      ...queryUseCaseTokens,
     ];
 
     expect(tokens.every((token) => typeof token === 'symbol')).toBe(true);
@@ -288,6 +318,23 @@ describe('Payment Notifications providers', () => {
     expect(module.get(PAYMENT_NOTIFICATION_REPOSITORY)).toBe(repository);
   });
 
+  it('registers one replaceable singleton ID generator', async () => {
+    const module = await createTestingModule();
+    const first = module.get<PaymentNotificationIdGenerator>(
+      PAYMENT_NOTIFICATION_ID_GENERATOR,
+    );
+    const second = module.get<PaymentNotificationIdGenerator>(
+      PAYMENT_NOTIFICATION_ID_GENERATOR,
+    );
+
+    expect(first).toBe(second);
+    expect(first()).toEqual(expect.any(String));
+    expect(first()).not.toHaveLength(0);
+    expect(
+      paymentNotificationIdGeneratorProviderDefinition.inject,
+    ).toBeUndefined();
+  });
+
   it('registers all eight use-case providers', async () => {
     const module = await createTestingModule();
 
@@ -296,6 +343,15 @@ describe('Payment Notifications providers', () => {
         jest.mocked(useCaseConstructors[index]).mock.instances[0],
       );
     });
+  });
+
+  it('registers the four query use-case providers', async () => {
+    const module = await createTestingModule();
+
+    for (const token of queryUseCaseTokens) {
+      expect(module.get(token)).toBeDefined();
+      expect(module.get(token)).toBe(module.get(token));
+    }
   });
 
   it('exports all eight use-case providers', async () => {
@@ -318,6 +374,47 @@ describe('Payment Notifications providers', () => {
     }).compile();
 
     expect(module.get<readonly unknown[]>(USE_CASE_CONSUMER)).toHaveLength(8);
+  });
+
+  it('exports all four query use-case providers', async () => {
+    const QUERY_CONSUMER = Symbol('QUERY_CONSUMER');
+
+    @Module({
+      imports: [PaymentNotificationsModule],
+      providers: [
+        {
+          provide: QUERY_CONSUMER,
+          inject: [...queryUseCaseTokens],
+          useFactory: (...useCases: readonly unknown[]) => useCases,
+        },
+      ],
+    })
+    class ConsumerModule {}
+
+    const module = await Test.createTestingModule({
+      imports: [ConsumerModule],
+    }).compile();
+
+    expect(module.get<readonly unknown[]>(QUERY_CONSUMER)).toHaveLength(4);
+  });
+
+  it('configures customer and administrative query scopes', async () => {
+    await createTestingModule();
+
+    expect(GetPaymentNotificationByIdUseCase).toHaveBeenNthCalledWith(1, {
+      repository,
+      scope: 'customer',
+    });
+    expect(GetPaymentNotificationByIdUseCase).toHaveBeenNthCalledWith(2, {
+      repository,
+      scope: 'administrative',
+    });
+    expect(ListCustomerPaymentNotificationsUseCase).toHaveBeenCalledWith({
+      repository,
+    });
+    expect(ListPaymentNotificationsByCustomerUseCase).toHaveBeenCalledWith({
+      repository,
+    });
   });
 
   it('injects repository and clock into Create Draft', async () => {
@@ -456,9 +553,23 @@ describe('Payment Notifications providers', () => {
     ) as unknown[];
 
     expect(exportedTokens).not.toContain(PAYMENT_NOTIFICATION_CLOCK);
+    expect(exportedTokens).not.toContain(PAYMENT_NOTIFICATION_ID_GENERATOR);
     expect(exportedTokens).not.toContain(PAYMENT_NOTIFICATION_STATE_TRANSITION);
     expect(exportedTokens).not.toContain(AZURE_ACCESS_TOKEN_PROVIDER);
     expect(exportedTokens).not.toContain(DATAVERSE_ACCESS_TOKEN_PROVIDER);
+  });
+
+  it('injects only the shared repository into query providers', () => {
+    for (const providerDefinition of [
+      getPaymentNotificationByIdUseCaseProviderDefinition,
+      listCustomerPaymentNotificationsUseCaseProviderDefinition,
+      adminGetPaymentNotificationByIdUseCaseProviderDefinition,
+      adminListPaymentNotificationsByCustomerUseCaseProviderDefinition,
+    ]) {
+      expect(providerDefinition.inject).toEqual([
+        PAYMENT_NOTIFICATION_REPOSITORY,
+      ]);
+    }
   });
 
   it('imports DataverseModule without declaring transversal providers', () => {
@@ -661,15 +772,15 @@ describe('Payment Notifications providers', () => {
     );
   });
 
-  it('does not declare controllers or endpoints', () => {
+  it('registers both approved controllers', () => {
     const controllers = Reflect.getMetadata(
       'controllers',
       PaymentNotificationsModule,
     ) as unknown[] | undefined;
 
-    expect(controllers ?? []).toEqual([]);
-    expect(productionSource).not.toMatch(
-      /@Controller|@(Get|Post|Put|Patch|Delete)\(/,
-    );
+    expect(controllers).toEqual([
+      PaymentNotificationsController,
+      AdminPaymentNotificationsController,
+    ]);
   });
 });

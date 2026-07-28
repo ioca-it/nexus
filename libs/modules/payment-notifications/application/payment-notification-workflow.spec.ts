@@ -160,6 +160,7 @@ describe('PAYMENT_NOTIFICATION_WORKFLOW', () => {
   it('publishes stable permission actions without changing workflow actions', () => {
     expect(PAYMENT_NOTIFICATION_PERMISSION_ACTIONS).toMatchObject({
       CREATE_DRAFT: 'create_draft',
+      READ: 'read',
       UPDATE: 'update',
       SUBMIT: PAYMENT_NOTIFICATION_ACTIONS.SUBMIT,
       START_REVIEW: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,

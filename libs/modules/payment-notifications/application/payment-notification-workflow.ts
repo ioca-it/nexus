@@ -17,6 +17,7 @@ export const PAYMENT_NOTIFICATIONS_PERMISSION_MODULE = 'payment-notifications';
 
 export const PAYMENT_NOTIFICATION_PERMISSION_ACTIONS = Object.freeze({
   CREATE_DRAFT: 'create_draft',
+  READ: 'read',
   UPDATE: 'update',
   ...PAYMENT_NOTIFICATION_ACTIONS,
 } as const);

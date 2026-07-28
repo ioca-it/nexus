@@ -1,4 +1,5 @@
 export * from './create-draft';
+export * from './queries';
 export * from './reject';
 export * from './request-changes';
 export * from './resubmit';

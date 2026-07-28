@@ -1,7 +1,12 @@
+import { randomUUID } from 'node:crypto';
+
 import type { FactoryProvider, Provider } from '@nestjs/common';
 import { getAppConfig } from '@nexus/config';
 import {
   CreateDraftPaymentNotificationUseCase,
+  GetPaymentNotificationByIdUseCase,
+  ListCustomerPaymentNotificationsUseCase,
+  ListPaymentNotificationsByCustomerUseCase,
   RejectPaymentNotificationUseCase,
   RequestChangesPaymentNotificationUseCase,
   ResubmitPaymentNotificationUseCase,
@@ -25,8 +30,13 @@ import {
   DATAVERSE_ACCESS_TOKEN_PROVIDER,
 } from '../dataverse';
 import {
+  ADMIN_GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  ADMIN_LIST_PAYMENT_NOTIFICATIONS_BY_CUSTOMER_USE_CASE,
   CREATE_DRAFT_PAYMENT_NOTIFICATION_USE_CASE,
+  GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+  LIST_CUSTOMER_PAYMENT_NOTIFICATIONS_USE_CASE,
   PAYMENT_NOTIFICATION_CLOCK,
+  PAYMENT_NOTIFICATION_ID_GENERATOR,
   PAYMENT_NOTIFICATION_REPOSITORY,
   PAYMENT_NOTIFICATION_STATE_TRANSITION,
   REJECT_PAYMENT_NOTIFICATION_USE_CASE,
@@ -36,7 +46,14 @@ import {
   SUBMIT_PAYMENT_NOTIFICATION_USE_CASE,
   UPDATE_PAYMENT_NOTIFICATION_USE_CASE,
   VALIDATE_PAYMENT_NOTIFICATION_USE_CASE,
+  type PaymentNotificationIdGenerator,
 } from './payment-notifications.tokens';
+
+export const paymentNotificationIdGeneratorProviderDefinition: FactoryProvider<PaymentNotificationIdGenerator> =
+  {
+    provide: PAYMENT_NOTIFICATION_ID_GENERATOR,
+    useFactory: (): PaymentNotificationIdGenerator => () => randomUUID(),
+  };
 
 export const paymentNotificationRepositoryProviderDefinition: FactoryProvider<PaymentNotificationRepository> =
   {
@@ -68,6 +85,44 @@ export const paymentNotificationStateTransitionProviderDefinition: FactoryProvid
   provide: PAYMENT_NOTIFICATION_STATE_TRANSITION,
   useFactory: () => createStateTransition<PaymentNotification>(),
 };
+
+export const getPaymentNotificationByIdUseCaseProviderDefinition: FactoryProvider<GetPaymentNotificationByIdUseCase> =
+  {
+    provide: GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+    inject: [PAYMENT_NOTIFICATION_REPOSITORY],
+    useFactory: (repository: PaymentNotificationRepository) =>
+      new GetPaymentNotificationByIdUseCase({
+        repository,
+        scope: 'customer',
+      }),
+  };
+
+export const listCustomerPaymentNotificationsUseCaseProviderDefinition: FactoryProvider<ListCustomerPaymentNotificationsUseCase> =
+  {
+    provide: LIST_CUSTOMER_PAYMENT_NOTIFICATIONS_USE_CASE,
+    inject: [PAYMENT_NOTIFICATION_REPOSITORY],
+    useFactory: (repository: PaymentNotificationRepository) =>
+      new ListCustomerPaymentNotificationsUseCase({ repository }),
+  };
+
+export const adminGetPaymentNotificationByIdUseCaseProviderDefinition: FactoryProvider<GetPaymentNotificationByIdUseCase> =
+  {
+    provide: ADMIN_GET_PAYMENT_NOTIFICATION_BY_ID_USE_CASE,
+    inject: [PAYMENT_NOTIFICATION_REPOSITORY],
+    useFactory: (repository: PaymentNotificationRepository) =>
+      new GetPaymentNotificationByIdUseCase({
+        repository,
+        scope: 'administrative',
+      }),
+  };
+
+export const adminListPaymentNotificationsByCustomerUseCaseProviderDefinition: FactoryProvider<ListPaymentNotificationsByCustomerUseCase> =
+  {
+    provide: ADMIN_LIST_PAYMENT_NOTIFICATIONS_BY_CUSTOMER_USE_CASE,
+    inject: [PAYMENT_NOTIFICATION_REPOSITORY],
+    useFactory: (repository: PaymentNotificationRepository) =>
+      new ListPaymentNotificationsByCustomerUseCase({ repository }),
+  };
 
 export const createDraftPaymentNotificationUseCaseProviderDefinition: FactoryProvider<CreateDraftPaymentNotificationUseCase> =
   {
@@ -219,8 +274,13 @@ export const resubmitPaymentNotificationUseCaseProviderDefinition: FactoryProvid
 // Opti ChatGPT: dependencias compartidas por los casos de uso para evitar instancias redundantes.
 export const PAYMENT_NOTIFICATION_PROVIDERS: Provider[] = [
   paymentNotificationRepositoryProviderDefinition,
+  paymentNotificationIdGeneratorProviderDefinition,
   paymentNotificationClockProviderDefinition,
   paymentNotificationStateTransitionProviderDefinition,
+  getPaymentNotificationByIdUseCaseProviderDefinition,
+  listCustomerPaymentNotificationsUseCaseProviderDefinition,
+  adminGetPaymentNotificationByIdUseCaseProviderDefinition,
+  adminListPaymentNotificationsByCustomerUseCaseProviderDefinition,
   createDraftPaymentNotificationUseCaseProviderDefinition,
   updatePaymentNotificationUseCaseProviderDefinition,
   submitPaymentNotificationUseCaseProviderDefinition,
