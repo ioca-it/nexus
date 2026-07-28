@@ -1,14 +1,27 @@
 # Create Draft Payment Notification
 
-Creates a `PaymentNotification` in `DRAFT` state by delegating directly to
-`PaymentNotification.create()`.
+Creates a `PaymentNotification` in `DRAFT` state after evaluating the actor's
+explicit `create_draft` permission.
 
 ```ts
 import { CreateDraftPaymentNotificationUseCase } from '@nexus/modules/payment-notifications';
 
 const useCase = new CreateDraftPaymentNotificationUseCase({ repository });
-const { paymentNotification } = await useCase.execute(request);
+const { paymentNotification } = await useCase.execute({
+  actor,
+  id,
+  paymentDate,
+  amount,
+  currency,
+  bankReference,
+  receiptFileId,
+  invoiceIds,
+});
 ```
+
+`customerId` is not accepted by the request. It is taken exclusively from
+`actor.customerId`, which must be present. Authorization denial happens before
+the clock, entity creation, or persistence.
 
 By default, the use case obtains the creation timestamp from `new Date()`. A
 clock can be injected for deterministic tests:
@@ -28,5 +41,5 @@ After creating the `DRAFT` entity through `PaymentNotification.create()`, the
 use case awaits `repository.create(paymentNotification)` and returns that same
 entity. Domain and repository errors are propagated unchanged.
 
-The use case does not invoke Platform engines, workflows, permissions,
-notifications, or external services.
+The use case reuses Platform's Permissions Engine through the module access
+policy. It does not execute workflow, notifications, or external services.

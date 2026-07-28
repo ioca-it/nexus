@@ -141,6 +141,19 @@ const config: NexusConfig = Object.freeze({
     environment: 'test-bc-environment',
     companyId: 'test-bc-company',
   }),
+  paymentNotifications: Object.freeze({
+    approvals: Object.freeze({
+      validate: Object.freeze({
+        approvalGroupIds: Object.freeze(['VALIDATORS']),
+      }),
+      reject: Object.freeze({
+        approvalGroupIds: Object.freeze(['REJECTORS']),
+      }),
+      requestChanges: Object.freeze({
+        approvalGroupIds: Object.freeze(['CHANGE-REQUESTERS']),
+      }),
+    }),
+  }),
 });
 
 const azureAccessTokenProvider: AzureAccessTokenProvider = Object.freeze({
@@ -192,6 +205,7 @@ interface ComposedUseCaseDependencies {
   readonly repository: PaymentNotificationRepository;
   readonly stateTransition?: StateTransition<PaymentNotification>;
   readonly clock: Clock;
+  readonly approvalGroupIds?: readonly string[];
 }
 
 function getComposedDependencies(
@@ -329,9 +343,6 @@ describe('Payment Notifications providers', () => {
   it.each([
     ['Submit', SubmitPaymentNotificationUseCase],
     ['Start Review', StartReviewPaymentNotificationUseCase],
-    ['Validate', ValidatePaymentNotificationUseCase],
-    ['Reject', RejectPaymentNotificationUseCase],
-    ['Request Changes', RequestChangesPaymentNotificationUseCase],
     ['Resubmit', ResubmitPaymentNotificationUseCase],
   ] as const)(
     'injects repository, StateTransition and clock into %s',
@@ -343,6 +354,37 @@ describe('Payment Notifications providers', () => {
         repository,
         stateTransition,
         clock,
+      });
+    },
+  );
+
+  it.each([
+    [
+      'Validate',
+      ValidatePaymentNotificationUseCase,
+      config.paymentNotifications?.approvals.validate.approvalGroupIds,
+    ],
+    [
+      'Reject',
+      RejectPaymentNotificationUseCase,
+      config.paymentNotifications?.approvals.reject.approvalGroupIds,
+    ],
+    [
+      'Request Changes',
+      RequestChangesPaymentNotificationUseCase,
+      config.paymentNotifications?.approvals.requestChanges.approvalGroupIds,
+    ],
+  ] as const)(
+    'injects configured approval groups into %s',
+    async (_name, useCaseConstructor, approvalGroupIds) => {
+      const module = await createTestingModule();
+      const clock = module.get<Clock>(PAYMENT_NOTIFICATION_CLOCK);
+
+      expect(useCaseConstructor).toHaveBeenCalledWith({
+        repository,
+        stateTransition,
+        clock,
+        approvalGroupIds,
       });
     },
   );

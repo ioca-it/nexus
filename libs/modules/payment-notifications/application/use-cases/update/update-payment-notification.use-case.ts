@@ -1,12 +1,16 @@
+import type { AuthenticatedActor } from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
 import {
   PaymentNotificationStatus,
   type PaymentNotificationId,
 } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
+import { PAYMENT_NOTIFICATION_PERMISSION_ACTIONS } from '../../payment-notification-workflow';
+import { evaluatePaymentNotificationAccess } from '../../security';
 import type { Clock } from '../create-draft';
 
 export interface UpdatePaymentNotificationRequest {
+  readonly actor: AuthenticatedActor;
   readonly id: PaymentNotificationId;
   readonly paymentDate: Date;
   readonly amount: number;
@@ -44,6 +48,16 @@ export class UpdatePaymentNotificationUseCase {
 
     if (!paymentNotification) {
       throw new Error('Payment notification not found');
+    }
+
+    const accessDecision = evaluatePaymentNotificationAccess({
+      actor: request.actor,
+      action: PAYMENT_NOTIFICATION_PERMISSION_ACTIONS.UPDATE,
+      resourceCustomerId: paymentNotification.customerId,
+    });
+
+    if (!accessDecision.allowed) {
+      throw new Error('Payment notification access denied');
     }
 
     if (

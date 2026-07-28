@@ -13,6 +13,14 @@ export const PAYMENT_NOTIFICATION_ACTIONS = Object.freeze({
   RESUBMIT: 'resubmit',
 } as const);
 
+export const PAYMENT_NOTIFICATIONS_PERMISSION_MODULE = 'payment-notifications';
+
+export const PAYMENT_NOTIFICATION_PERMISSION_ACTIONS = Object.freeze({
+  CREATE_DRAFT: 'create_draft',
+  UPDATE: 'update',
+  ...PAYMENT_NOTIFICATION_ACTIONS,
+} as const);
+
 export const PAYMENT_NOTIFICATION_WORKFLOW: Workflow = Object.freeze({
   workflowId: PAYMENT_NOTIFICATION_WORKFLOW_ID,
   initialState: PaymentNotificationStatus.DRAFT,

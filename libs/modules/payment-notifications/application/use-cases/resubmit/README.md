@@ -11,12 +11,16 @@ const useCase = new ResubmitPaymentNotificationUseCase({
   stateTransition,
 });
 
-const result = await useCase.execute({ id });
+const result = await useCase.execute({ id, actor });
 ```
 
 The process request uses the entity's current status, the existing
 `PAYMENT_NOTIFICATION_WORKFLOW` reference, and
-`PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT`.
+`PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT`. Authorization uses only the explicit
+`actor.permissions`; this transition does not require an approval group.
+When `actor.customerId` is present, it must match the loaded payment
+notification exactly. An actor without customer context still requires the
+explicit `resubmit` permission.
 
 Denied or invalid results return the original entity without reading the clock
 or persisting. An allowed result must contain `requireApproval: false` and

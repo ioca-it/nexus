@@ -103,6 +103,20 @@ const TRANSITION_USE_CASE_INJECTIONS = [
   PAYMENT_NOTIFICATION_CLOCK,
 ];
 
+function getApprovalGroupIds(
+  action: 'validate' | 'reject' | 'requestChanges',
+): readonly string[] {
+  const approvals = getAppConfig().paymentNotifications?.approvals;
+
+  if (!approvals) {
+    throw new Error(
+      'Payment Notifications approval configuration is incomplete',
+    );
+  }
+
+  return approvals[action].approvalGroupIds;
+}
+
 export const submitPaymentNotificationUseCaseProviderDefinition: FactoryProvider<SubmitPaymentNotificationUseCase> =
   {
     provide: SUBMIT_PAYMENT_NOTIFICATION_USE_CASE,
@@ -148,6 +162,7 @@ export const validatePaymentNotificationUseCaseProviderDefinition: FactoryProvid
         repository,
         stateTransition,
         clock,
+        approvalGroupIds: getApprovalGroupIds('validate'),
       }),
   };
 
@@ -164,6 +179,7 @@ export const rejectPaymentNotificationUseCaseProviderDefinition: FactoryProvider
         repository,
         stateTransition,
         clock,
+        approvalGroupIds: getApprovalGroupIds('reject'),
       }),
   };
 
@@ -180,6 +196,7 @@ export const requestChangesPaymentNotificationUseCaseProviderDefinition: Factory
         repository,
         stateTransition,
         clock,
+        approvalGroupIds: getApprovalGroupIds('requestChanges'),
       }),
   };
 

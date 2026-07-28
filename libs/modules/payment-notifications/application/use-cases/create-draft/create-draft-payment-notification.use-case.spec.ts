@@ -1,6 +1,14 @@
+import {
+  createAuthenticatedActor,
+  type AuthenticatedActor,
+} from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
 import { PaymentNotificationStatus } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
+import {
+  PAYMENT_NOTIFICATION_PERMISSION_ACTIONS,
+  PAYMENT_NOTIFICATIONS_PERMISSION_MODULE,
+} from '../../payment-notification-workflow';
 import {
   CreateDraftPaymentNotificationUseCase,
   type Clock,
@@ -9,12 +17,34 @@ import {
 
 const CREATED_AT = new Date('2026-07-24T15:30:00.000Z');
 
+function createActor(
+  customerId: string | null = 'customer-1',
+  hasPermission = true,
+  roles: readonly string[] = [],
+): AuthenticatedActor {
+  return createAuthenticatedActor({
+    userId: 'actor-1',
+    customerId,
+    roles,
+    permissions: hasPermission
+      ? [
+          {
+            module: PAYMENT_NOTIFICATIONS_PERMISSION_MODULE,
+            action: PAYMENT_NOTIFICATION_PERMISSION_ACTIONS.CREATE_DRAFT,
+            effect: 'allow',
+          },
+        ]
+      : [],
+    approvalGroupIds: [],
+  });
+}
+
 function createRequest(
   overrides: Partial<CreateDraftPaymentNotificationRequest> = {},
 ): CreateDraftPaymentNotificationRequest {
   return {
+    actor: createActor(),
     id: 'payment-notification-1',
-    customerId: 'customer-1',
     paymentDate: new Date('2026-07-20T00:00:00.000Z'),
     amount: 125.5,
     currency: 'USD',
@@ -61,6 +91,38 @@ describe('CreateDraftPaymentNotificationUseCase', () => {
       PaymentNotificationStatus.DRAFT,
     );
     expect(repository.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses customerId exclusively from the authenticated actor', async () => {
+    const repository = createRepository();
+    const actor = createActor('customer-from-actor');
+
+    const result = await createUseCase(repository).execute(
+      createRequest({ actor }),
+    );
+
+    expect(result.paymentNotification.customerId).toBe('customer-from-actor');
+    expect(repository.create).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['missing customer', createActor(null)],
+    ['missing permission', createActor('customer-1', false)],
+    [
+      'Nexus.Admin without permission',
+      createActor(null, false, ['Nexus.Admin']),
+    ],
+  ])('denies %s before creating or reading the clock', async (_case, actor) => {
+    const repository = createRepository();
+    const clock = jest.fn(() => new Date(CREATED_AT.getTime()));
+    const create = jest.spyOn(PaymentNotification, 'create');
+
+    await expect(
+      createUseCase(repository, clock).execute(createRequest({ actor })),
+    ).rejects.toThrow('Payment notification access denied');
+    expect(clock).not.toHaveBeenCalled();
+    expect(create).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it('returns the same entity passed to repository.create', async () => {
@@ -207,7 +269,6 @@ describe('CreateDraftPaymentNotificationUseCase', () => {
 
   it.each([
     [{ amount: 0 }, 'Payment notification amount must be greater than zero'],
-    [{ customerId: '   ' }, 'Payment notification customerId is required'],
     [
       { bankReference: '   ' },
       'Payment notification bankReference is required',

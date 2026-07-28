@@ -1,5 +1,7 @@
 import {
+  createAuthenticatedActor,
   createStateTransition as createPlatformStateTransition,
+  type AuthenticatedActor,
   type ApplicationPipelineResult,
   type ProcessDecision,
   type StateTransition,
@@ -14,9 +16,51 @@ import {
   PAYMENT_NOTIFICATION_ACTIONS,
   PAYMENT_NOTIFICATION_WORKFLOW,
 } from '../../payment-notification-workflow';
-import { RequestChangesPaymentNotificationUseCase } from './request-changes-payment-notification.use-case';
+import {
+  RequestChangesPaymentNotificationUseCase as BaseRequestChangesPaymentNotificationUseCase,
+  type RequestChangesPaymentNotificationRequest,
+} from './request-changes-payment-notification.use-case';
 
 const UPDATED_AT = new Date('2026-07-25T15:30:00.000Z');
+const APPROVAL_GROUP_IDS = Object.freeze(['CHANGE-REQUESTERS']);
+const ACTOR = createAuthenticatedActor({
+  userId: 'actor-1',
+  customerId: 'administrative-customer-context',
+  roles: [],
+  permissions: [
+    {
+      module: 'payment-notifications',
+      action: PAYMENT_NOTIFICATION_ACTIONS.REQUEST_CHANGES,
+      effect: 'allow',
+    },
+  ],
+  approvalGroupIds: APPROVAL_GROUP_IDS,
+});
+
+type RequestChangesDependencies = ConstructorParameters<
+  typeof BaseRequestChangesPaymentNotificationUseCase
+>[0];
+
+class RequestChangesPaymentNotificationUseCase extends BaseRequestChangesPaymentNotificationUseCase {
+  constructor(
+    dependencies: Omit<RequestChangesDependencies, 'approvalGroupIds'> & {
+      readonly approvalGroupIds?: readonly string[];
+    },
+  ) {
+    super({
+      ...dependencies,
+      approvalGroupIds: dependencies.approvalGroupIds ?? APPROVAL_GROUP_IDS,
+    });
+  }
+
+  override execute(
+    request: Omit<RequestChangesPaymentNotificationRequest, 'actor'> & {
+      readonly actor?: AuthenticatedActor;
+    },
+  ) {
+    return super.execute({ ...request, actor: request.actor ?? ACTOR });
+  }
+}
 
 function createDraft(
   overrides: Partial<CreatePaymentNotificationInput> = {},
@@ -127,7 +171,7 @@ describe('RequestChangesPaymentNotificationUseCase', () => {
     expect(repository.update).not.toHaveBeenCalled();
   });
 
-  it('denies the real approval transition until actor context is integrated', async () => {
+  it('authorizes the real approval transition with actor permission and group', async () => {
     const original = createUnderReview();
     const repository = createRepository(original);
     const useCase = new RequestChangesPaymentNotificationUseCase({
@@ -139,14 +183,62 @@ describe('RequestChangesPaymentNotificationUseCase', () => {
     const result = await useCase.execute({ id: original.id });
 
     expect(result.pipelineResult).toMatchObject({
-      allowed: false,
+      allowed: true,
       valid: true,
       requireApproval: true,
-      nextState: null,
-      reason: 'Actor context is required for approval',
+      nextState: PaymentNotificationStatus.CHANGES_REQUESTED,
+      reason: 'Process allowed',
+    });
+    expect(result.paymentNotification.status).toBe(
+      PaymentNotificationStatus.CHANGES_REQUESTED,
+    );
+    expect(repository.update).toHaveBeenCalledWith(result.paymentNotification);
+  });
+
+  it('denies the real transition when the actor is outside the configured groups', async () => {
+    const original = createUnderReview();
+    const repository = createRepository(original);
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const actor = createAuthenticatedActor({
+      userId: 'actor-outside-group',
+      customerId: 'customer-1',
+      roles: ['Nexus.Admin'],
+      permissions: [
+        {
+          module: 'payment-notifications',
+          action: PAYMENT_NOTIFICATION_ACTIONS.REQUEST_CHANGES,
+          effect: 'allow',
+        },
+      ],
+      approvalGroupIds: ['OTHER-GROUP'],
+    });
+    const useCase = new RequestChangesPaymentNotificationUseCase({
+      repository,
+      stateTransition: createPlatformStateTransition<PaymentNotification>(),
+      clock,
+    });
+
+    const result = await useCase.execute({ id: original.id, actor });
+
+    expect(result.pipelineResult).toMatchObject({
+      allowed: false,
+      reason: 'Actor is not a member of a required approval group',
     });
     expect(result.paymentNotification).toBe(original);
+    expect(clock).not.toHaveBeenCalled();
     expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an empty approval-group configuration at construction', () => {
+    expect(
+      () =>
+        new BaseRequestChangesPaymentNotificationUseCase({
+          repository: createRepository(),
+          stateTransition:
+            createPlatformStateTransition<PaymentNotification>(),
+          approvalGroupIds: [],
+        }),
+    ).toThrow('At least one approval group ID is required');
   });
 
   it.each([

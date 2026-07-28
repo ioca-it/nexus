@@ -2,6 +2,7 @@ import { evaluateTransition } from '@nexus/platform';
 import { PaymentNotificationStatus } from '../domain/payment-notification.types';
 import {
   PAYMENT_NOTIFICATION_ACTIONS,
+  PAYMENT_NOTIFICATION_PERMISSION_ACTIONS,
   PAYMENT_NOTIFICATION_WORKFLOW,
 } from './payment-notification-workflow';
 
@@ -140,6 +141,7 @@ describe('PAYMENT_NOTIFICATION_WORKFLOW', () => {
     });
 
     expect(Object.isFrozen(PAYMENT_NOTIFICATION_ACTIONS)).toBe(true);
+    expect(Object.isFrozen(PAYMENT_NOTIFICATION_PERMISSION_ACTIONS)).toBe(true);
     expect(Object.isFrozen(PAYMENT_NOTIFICATION_WORKFLOW)).toBe(true);
     expect(Object.isFrozen(PAYMENT_NOTIFICATION_WORKFLOW.states)).toBe(true);
     expect(Object.isFrozen(PAYMENT_NOTIFICATION_WORKFLOW.transitions)).toBe(
@@ -153,5 +155,18 @@ describe('PAYMENT_NOTIFICATION_WORKFLOW', () => {
     expect(JSON.stringify(PAYMENT_NOTIFICATION_WORKFLOW)).toBe(
       originalDefinition
     );
+  });
+
+  it('publishes stable permission actions without changing workflow actions', () => {
+    expect(PAYMENT_NOTIFICATION_PERMISSION_ACTIONS).toMatchObject({
+      CREATE_DRAFT: 'create_draft',
+      UPDATE: 'update',
+      SUBMIT: PAYMENT_NOTIFICATION_ACTIONS.SUBMIT,
+      START_REVIEW: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
+      VALIDATE: PAYMENT_NOTIFICATION_ACTIONS.VALIDATE,
+      REJECT: PAYMENT_NOTIFICATION_ACTIONS.REJECT,
+      REQUEST_CHANGES: PAYMENT_NOTIFICATION_ACTIONS.REQUEST_CHANGES,
+      RESUBMIT: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
+    });
   });
 });

@@ -1,7 +1,10 @@
-import type {
-  ApplicationPipelineResult,
-  ProcessDecision,
-  StateTransition,
+import {
+  createAuthenticatedActor,
+  createStateTransition as createPlatformStateTransition,
+  type AuthenticatedActor,
+  type ApplicationPipelineResult,
+  type ProcessDecision,
+  type StateTransition,
 } from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
 import {
@@ -13,9 +16,35 @@ import {
   PAYMENT_NOTIFICATION_ACTIONS,
   PAYMENT_NOTIFICATION_WORKFLOW,
 } from '../../payment-notification-workflow';
-import { SubmitPaymentNotificationUseCase } from './submit-payment-notification.use-case';
+import {
+  SubmitPaymentNotificationUseCase as BaseSubmitPaymentNotificationUseCase,
+  type SubmitPaymentNotificationRequest,
+} from './submit-payment-notification.use-case';
 
 const UPDATED_AT = new Date('2026-07-24T15:30:00.000Z');
+const ACTOR = createAuthenticatedActor({
+  userId: 'actor-1',
+  customerId: 'customer-1',
+  roles: [],
+  permissions: [
+    {
+      module: 'payment-notifications',
+      action: PAYMENT_NOTIFICATION_ACTIONS.SUBMIT,
+      effect: 'allow',
+    },
+  ],
+  approvalGroupIds: [],
+});
+
+class SubmitPaymentNotificationUseCase extends BaseSubmitPaymentNotificationUseCase {
+  override execute(
+    request: Omit<SubmitPaymentNotificationRequest, 'actor'> & {
+      readonly actor?: AuthenticatedActor;
+    },
+  ) {
+    return super.execute({ ...request, actor: request.actor ?? ACTOR });
+  }
+}
 
 function createPaymentNotification(
   overrides: Partial<CreatePaymentNotificationInput> = {},
@@ -198,6 +227,80 @@ describe('SubmitPaymentNotificationUseCase', () => {
     );
     expect(repository.update).toHaveBeenCalledTimes(1);
     expect(repository.update).toHaveBeenCalledWith(result.paymentNotification);
+  });
+
+  it('denies the real transition without an explicit actor permission', async () => {
+    const original = createPaymentNotification();
+    const repository = createRepository(original);
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const actor = createAuthenticatedActor({
+      userId: 'actor-without-permission',
+      customerId: 'customer-1',
+      roles: ['Nexus.Admin'],
+      permissions: [],
+      approvalGroupIds: [],
+    });
+    const stateTransition = createStateTransition();
+    const useCase = new SubmitPaymentNotificationUseCase({
+      repository,
+      stateTransition,
+      clock,
+    });
+
+    await expect(
+      useCase.execute({ id: original.id, actor }),
+    ).rejects.toThrow('Payment notification access denied');
+    expect(stateTransition.execute).not.toHaveBeenCalled();
+    expect(clock).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('denies another customer before StateTransition', async () => {
+    const original = createPaymentNotification();
+    const repository = createRepository(original);
+    const stateTransition = createStateTransition();
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const actor = createAuthenticatedActor({
+      userId: 'other-customer-actor',
+      customerId: 'other-customer',
+      roles: [],
+      permissions: ACTOR.permissions,
+      approvalGroupIds: [],
+    });
+    const useCase = new SubmitPaymentNotificationUseCase({
+      repository,
+      stateTransition,
+      clock,
+    });
+
+    await expect(
+      useCase.execute({ id: original.id, actor }),
+    ).rejects.toThrow('Payment notification access denied');
+    expect(stateTransition.execute).not.toHaveBeenCalled();
+    expect(clock).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('allows an actor without customer context when explicitly permitted', async () => {
+    const original = createPaymentNotification();
+    const repository = createRepository(original);
+    const actor = createAuthenticatedActor({
+      userId: 'administrative-actor',
+      customerId: null,
+      roles: [],
+      permissions: ACTOR.permissions,
+      approvalGroupIds: [],
+    });
+    const useCase = new SubmitPaymentNotificationUseCase({
+      repository,
+      stateTransition: createPlatformStateTransition<PaymentNotification>(),
+      clock: () => new Date(UPDATED_AT.getTime()),
+    });
+
+    const result = await useCase.execute({ id: original.id, actor });
+
+    expect(result.pipelineResult.allowed).toBe(true);
+    expect(repository.update).toHaveBeenCalledTimes(1);
   });
 
   it('uses the existing workflow and submit action in the process request', async () => {

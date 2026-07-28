@@ -1,5 +1,7 @@
 import {
+  createAuthenticatedActor,
   createStateTransition as createPlatformStateTransition,
+  type AuthenticatedActor,
   type ApplicationPipelineResult,
   type ProcessDecision,
   type StateTransition,
@@ -14,9 +16,35 @@ import {
   PAYMENT_NOTIFICATION_ACTIONS,
   PAYMENT_NOTIFICATION_WORKFLOW,
 } from '../../payment-notification-workflow';
-import { StartReviewPaymentNotificationUseCase } from './start-review-payment-notification.use-case';
+import {
+  StartReviewPaymentNotificationUseCase as BaseStartReviewPaymentNotificationUseCase,
+  type StartReviewPaymentNotificationRequest,
+} from './start-review-payment-notification.use-case';
 
 const UPDATED_AT = new Date('2026-07-24T15:30:00.000Z');
+const ACTOR = createAuthenticatedActor({
+  userId: 'actor-1',
+  customerId: 'administrative-customer-context',
+  roles: [],
+  permissions: [
+    {
+      module: 'payment-notifications',
+      action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
+      effect: 'allow',
+    },
+  ],
+  approvalGroupIds: [],
+});
+
+class StartReviewPaymentNotificationUseCase extends BaseStartReviewPaymentNotificationUseCase {
+  override execute(
+    request: Omit<StartReviewPaymentNotificationRequest, 'actor'> & {
+      readonly actor?: AuthenticatedActor;
+    },
+  ) {
+    return super.execute({ ...request, actor: request.actor ?? ACTOR });
+  }
+}
 
 function createDraft(
   overrides: Partial<CreatePaymentNotificationInput> = {},
@@ -134,6 +162,34 @@ describe('StartReviewPaymentNotificationUseCase', () => {
       PaymentNotificationStatus.UNDER_REVIEW,
     );
     expect(repository.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('denies the real transition without an explicit actor permission', async () => {
+    const original = createSubmitted();
+    const repository = createRepository(original);
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const actor = createAuthenticatedActor({
+      userId: 'actor-without-permission',
+      customerId: 'customer-1',
+      roles: ['Nexus.Admin'],
+      permissions: [],
+      approvalGroupIds: [],
+    });
+    const useCase = new StartReviewPaymentNotificationUseCase({
+      repository,
+      stateTransition: createPlatformStateTransition<PaymentNotification>(),
+      clock,
+    });
+
+    const result = await useCase.execute({ id: original.id, actor });
+
+    expect(result.pipelineResult).toMatchObject({
+      allowed: false,
+      reason: 'No applicable permission',
+    });
+    expect(result.paymentNotification).toBe(original);
+    expect(clock).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('does not start review from DRAFT', async () => {

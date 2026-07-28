@@ -1,13 +1,13 @@
+import type { AuthenticatedActor } from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
-import type {
-  CustomerId,
-  PaymentNotificationId,
-} from '../../../domain/payment-notification.types';
+import type { PaymentNotificationId } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
+import { PAYMENT_NOTIFICATION_PERMISSION_ACTIONS } from '../../payment-notification-workflow';
+import { evaluatePaymentNotificationAccess } from '../../security';
 
 export interface CreateDraftPaymentNotificationRequest {
+  readonly actor: AuthenticatedActor;
   readonly id: PaymentNotificationId;
-  readonly customerId: CustomerId;
   readonly paymentDate: Date;
   readonly amount: number;
   readonly currency: string;
@@ -42,9 +42,26 @@ export class CreateDraftPaymentNotificationUseCase {
   async execute(
     request: CreateDraftPaymentNotificationRequest,
   ): Promise<CreateDraftPaymentNotificationResult> {
+    const accessDecision = evaluatePaymentNotificationAccess({
+      actor: request.actor,
+      action: PAYMENT_NOTIFICATION_PERMISSION_ACTIONS.CREATE_DRAFT,
+      requireCustomer: true,
+    });
+
+    if (!accessDecision.allowed || request.actor.customerId === null) {
+      throw new Error('Payment notification access denied');
+    }
+
     const timestamp = this.clock();
     const paymentNotification = PaymentNotification.create({
-      ...request,
+      id: request.id,
+      customerId: request.actor.customerId,
+      paymentDate: request.paymentDate,
+      amount: request.amount,
+      currency: request.currency,
+      bankReference: request.bankReference,
+      receiptFileId: request.receiptFileId,
+      invoiceIds: request.invoiceIds,
       createdAt: new Date(timestamp.getTime()),
       updatedAt: new Date(timestamp.getTime()),
     });

@@ -1,3 +1,7 @@
+import {
+  createAuthenticatedActor,
+  type AuthenticatedActor,
+} from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
 import {
   PaymentNotificationStatus,
@@ -5,11 +9,37 @@ import {
 } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
 import {
+  PAYMENT_NOTIFICATION_PERMISSION_ACTIONS,
+  PAYMENT_NOTIFICATIONS_PERMISSION_MODULE,
+} from '../../payment-notification-workflow';
+import {
   UpdatePaymentNotificationUseCase,
   type UpdatePaymentNotificationRequest,
 } from './update-payment-notification.use-case';
 
 const UPDATED_AT = new Date('2026-07-26T15:30:00.000Z');
+
+function createActor(
+  customerId: string | null = 'customer-1',
+  hasPermission = true,
+  roles: readonly string[] = [],
+): AuthenticatedActor {
+  return createAuthenticatedActor({
+    userId: 'actor-1',
+    customerId,
+    roles,
+    permissions: hasPermission
+      ? [
+          {
+            module: PAYMENT_NOTIFICATIONS_PERMISSION_MODULE,
+            action: PAYMENT_NOTIFICATION_PERMISSION_ACTIONS.UPDATE,
+            effect: 'allow',
+          },
+        ]
+      : [],
+    approvalGroupIds: [],
+  });
+}
 
 function createDraft(
   overrides: Partial<CreatePaymentNotificationInput> = {},
@@ -64,6 +94,7 @@ function createRequest(
   overrides: Partial<UpdatePaymentNotificationRequest> = {},
 ): UpdatePaymentNotificationRequest {
   return {
+    actor: createActor(),
     id: 'payment-notification-1',
     paymentDate: new Date('2026-07-24T00:00:00.000Z'),
     amount: 250.75,
@@ -111,6 +142,65 @@ describe('UpdatePaymentNotificationUseCase', () => {
       PaymentNotificationStatus.DRAFT,
     );
     expect(repository.update).toHaveBeenCalledWith(result.paymentNotification);
+  });
+
+  it('denies a customer from another company before clock and updateDetails', async () => {
+    const original = createDraft();
+    const repository = createRepository(original);
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const updateDetails = jest.spyOn(
+      PaymentNotification.prototype,
+      'updateDetails',
+    );
+    const useCase = new UpdatePaymentNotificationUseCase({
+      repository,
+      clock,
+    });
+
+    await expect(
+      useCase.execute(
+        createRequest({ actor: createActor('different-customer') }),
+      ),
+    ).rejects.toThrow('Payment notification access denied');
+    expect(clock).not.toHaveBeenCalled();
+    expect(updateDetails).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['missing permission', createActor('customer-1', false)],
+    [
+      'Nexus.Admin without permission',
+      createActor(null, false, ['Nexus.Admin']),
+    ],
+  ])('denies %s without persisting', async (_case, actor) => {
+    const repository = createRepository();
+    const clock = jest.fn(() => new Date(UPDATED_AT.getTime()));
+    const useCase = new UpdatePaymentNotificationUseCase({
+      repository,
+      clock,
+    });
+
+    await expect(
+      useCase.execute(createRequest({ actor })),
+    ).rejects.toThrow('Payment notification access denied');
+    expect(clock).not.toHaveBeenCalled();
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('allows an actor without customer context when explicitly permitted', async () => {
+    const repository = createRepository();
+    const useCase = new UpdatePaymentNotificationUseCase({
+      repository,
+      clock: () => new Date(UPDATED_AT.getTime()),
+    });
+
+    const result = await useCase.execute(
+      createRequest({ actor: createActor(null) }),
+    );
+
+    expect(result.paymentNotification.customerId).toBe('customer-1');
+    expect(repository.update).toHaveBeenCalledTimes(1);
   });
 
   it('updates CHANGES_REQUESTED without changing its status', async () => {
@@ -360,6 +450,7 @@ describe('UpdatePaymentNotificationUseCase', () => {
     const result = await useCase.execute(request);
 
     expect(request).toEqual({
+      actor: request.actor,
       id: 'payment-notification-1',
       paymentDate: new Date('2026-07-24T00:00:00.000Z'),
       amount: 250.75,

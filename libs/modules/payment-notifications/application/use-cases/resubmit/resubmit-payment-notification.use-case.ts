@@ -1,6 +1,6 @@
 import type {
   ApplicationPipelineResult,
-  ProcessRequest,
+  AuthenticatedActor,
   StateTransition,
 } from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
@@ -9,17 +9,14 @@ import {
   type PaymentNotificationId,
 } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
-import {
-  PAYMENT_NOTIFICATION_ACTIONS,
-  PAYMENT_NOTIFICATION_WORKFLOW,
-} from '../../payment-notification-workflow';
+import { PAYMENT_NOTIFICATION_ACTIONS } from '../../payment-notification-workflow';
+import { createPaymentNotificationProcessRequest } from '../../process';
+import { evaluatePaymentNotificationAccess } from '../../security';
 import type { Clock } from '../create-draft';
-
-const PAYMENT_NOTIFICATIONS_MODULE = 'payment-notifications';
-const PAYMENT_NOTIFICATION_RESUBMIT_EVENT = 'payment-notification.resubmit';
 
 export interface ResubmitPaymentNotificationRequest {
   readonly id: PaymentNotificationId;
+  readonly actor: AuthenticatedActor;
 }
 
 export interface ResubmitPaymentNotificationResult {
@@ -57,9 +54,23 @@ export class ResubmitPaymentNotificationUseCase {
       throw new Error('Payment notification not found');
     }
 
+    const accessDecision = evaluatePaymentNotificationAccess({
+      actor: request.actor,
+      action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
+      resourceCustomerId: paymentNotification.customerId,
+    });
+
+    if (!accessDecision.allowed) {
+      throw new Error('Payment notification access denied');
+    }
+
     const { pipelineResult } = this.stateTransition.execute({
       entity: paymentNotification,
-      processRequest: this.createProcessRequest(paymentNotification),
+      processRequest: createPaymentNotificationProcessRequest({
+        actor: request.actor,
+        currentState: paymentNotification.status,
+        action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
+      }),
     });
 
     if (!pipelineResult.allowed || !pipelineResult.valid) {
@@ -92,61 +103,6 @@ export class ResubmitPaymentNotificationUseCase {
     return {
       paymentNotification: transitionedPaymentNotification,
       pipelineResult,
-    };
-  }
-
-  private createProcessRequest(
-    paymentNotification: PaymentNotification,
-  ): ProcessRequest {
-    return {
-      permissionRequest: {
-        permissions: [
-          {
-            module: PAYMENT_NOTIFICATIONS_MODULE,
-            action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
-            effect: 'allow',
-          },
-        ],
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
-      },
-      workflowConfiguration: {
-        workflows: [PAYMENT_NOTIFICATION_WORKFLOW],
-        routes: [
-          {
-            eventId: PAYMENT_NOTIFICATION_RESUBMIT_EVENT,
-            enabled: true,
-            workflowId: PAYMENT_NOTIFICATION_WORKFLOW.workflowId,
-            approvalGroupIds: [],
-          },
-        ],
-        approvalGroups: [],
-      },
-      workflowEvent: {
-        eventId: PAYMENT_NOTIFICATION_RESUBMIT_EVENT,
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
-      },
-      currentState: paymentNotification.status,
-      action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
-      notificationConfiguration: {
-        templates: [],
-        routes: [
-          {
-            eventId: PAYMENT_NOTIFICATION_RESUBMIT_EVENT,
-            enabled: false,
-            channels: [],
-            templateIds: [],
-            recipientGroups: [],
-          },
-        ],
-        recipientGroups: [],
-      },
-      notificationEvent: {
-        eventId: PAYMENT_NOTIFICATION_RESUBMIT_EVENT,
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.RESUBMIT,
-      },
     };
   }
 }

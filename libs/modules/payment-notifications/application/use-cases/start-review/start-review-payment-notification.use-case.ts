@@ -1,6 +1,6 @@
 import type {
   ApplicationPipelineResult,
-  ProcessRequest,
+  AuthenticatedActor,
   StateTransition,
 } from '@nexus/platform';
 import { PaymentNotification } from '../../../domain/payment-notification.entity';
@@ -9,18 +9,13 @@ import {
   type PaymentNotificationId,
 } from '../../../domain/payment-notification.types';
 import type { PaymentNotificationRepository } from '../../../domain/repositories';
-import {
-  PAYMENT_NOTIFICATION_ACTIONS,
-  PAYMENT_NOTIFICATION_WORKFLOW,
-} from '../../payment-notification-workflow';
+import { PAYMENT_NOTIFICATION_ACTIONS } from '../../payment-notification-workflow';
+import { createPaymentNotificationProcessRequest } from '../../process';
 import type { Clock } from '../create-draft';
-
-const PAYMENT_NOTIFICATIONS_MODULE = 'payment-notifications';
-const PAYMENT_NOTIFICATION_START_REVIEW_EVENT =
-  'payment-notification.start-review';
 
 export interface StartReviewPaymentNotificationRequest {
   readonly id: PaymentNotificationId;
+  readonly actor: AuthenticatedActor;
 }
 
 export interface StartReviewPaymentNotificationResult {
@@ -60,7 +55,11 @@ export class StartReviewPaymentNotificationUseCase {
 
     const { pipelineResult } = this.stateTransition.execute({
       entity: paymentNotification,
-      processRequest: this.createProcessRequest(paymentNotification),
+      processRequest: createPaymentNotificationProcessRequest({
+        actor: request.actor,
+        currentState: paymentNotification.status,
+        action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
+      }),
     });
 
     if (!pipelineResult.allowed || !pipelineResult.valid) {
@@ -84,61 +83,6 @@ export class StartReviewPaymentNotificationUseCase {
     return {
       paymentNotification: transitionedPaymentNotification,
       pipelineResult,
-    };
-  }
-
-  private createProcessRequest(
-    paymentNotification: PaymentNotification,
-  ): ProcessRequest {
-    return {
-      permissionRequest: {
-        permissions: [
-          {
-            module: PAYMENT_NOTIFICATIONS_MODULE,
-            action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
-            effect: 'allow',
-          },
-        ],
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
-      },
-      workflowConfiguration: {
-        workflows: [PAYMENT_NOTIFICATION_WORKFLOW],
-        routes: [
-          {
-            eventId: PAYMENT_NOTIFICATION_START_REVIEW_EVENT,
-            enabled: true,
-            workflowId: PAYMENT_NOTIFICATION_WORKFLOW.workflowId,
-            approvalGroupIds: [],
-          },
-        ],
-        approvalGroups: [],
-      },
-      workflowEvent: {
-        eventId: PAYMENT_NOTIFICATION_START_REVIEW_EVENT,
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
-      },
-      currentState: paymentNotification.status,
-      action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
-      notificationConfiguration: {
-        templates: [],
-        routes: [
-          {
-            eventId: PAYMENT_NOTIFICATION_START_REVIEW_EVENT,
-            enabled: false,
-            channels: [],
-            templateIds: [],
-            recipientGroups: [],
-          },
-        ],
-        recipientGroups: [],
-      },
-      notificationEvent: {
-        eventId: PAYMENT_NOTIFICATION_START_REVIEW_EVENT,
-        module: PAYMENT_NOTIFICATIONS_MODULE,
-        action: PAYMENT_NOTIFICATION_ACTIONS.START_REVIEW,
-      },
     };
   }
 }
