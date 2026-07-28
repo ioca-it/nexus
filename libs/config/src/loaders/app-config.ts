@@ -1,3 +1,5 @@
+import { loadDataverseConfig } from '../dataverse/dataverse-config.loader';
+import { loadPaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.loader';
 import type { NexusConfig } from '../types/config.types';
 import { envLoader } from './env-loader';
 
@@ -15,16 +17,14 @@ export const loadAppConfig = (): NexusConfig => ({
     keyVaultUrl: envLoader.getRequired('AZURE_KEY_VAULT_URL'),
     storageAccountName: envLoader.getRequired('AZURE_STORAGE_ACCOUNT_NAME'),
     applicationInsightsConnectionString: envLoader.getOptional(
-      'APPLICATIONINSIGHTS_CONNECTION_STRING'
+      'APPLICATIONINSIGHTS_CONNECTION_STRING',
     ),
   },
-  dataverse: {
-    environmentUrl: envLoader.getRequired('DATAVERSE_ENVIRONMENT_URL'),
-    apiVersion: envLoader.getOptional('DATAVERSE_API_VERSION', 'v9.2'),
-  },
+  dataverse: loadDataverseConfig(),
   businessCentral: {
     tenantId: envLoader.getRequired('BC_TENANT_ID'),
     environment: envLoader.getRequired('BC_ENVIRONMENT'),
     companyId: envLoader.getRequired('BC_COMPANY_ID'),
   },
+  paymentNotifications: loadPaymentNotificationsConfig(),
 });

@@ -1,3 +1,6 @@
+import type { DataverseConfig } from '../dataverse/dataverse-config.types';
+import type { PaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.types';
+
 export interface AzureConfig {
   tenantId: string;
   clientId: string;
@@ -7,10 +10,11 @@ export interface AzureConfig {
   applicationInsightsConnectionString: string;
 }
 
-export interface DataverseConfig {
-  environmentUrl: string;
-  apiVersion: string;
-}
+export type {
+  AuthenticatedActorDataverseSchemaConfig,
+  DataverseConfig,
+  PaymentNotificationDataverseSchemaConfig,
+} from '../dataverse/dataverse-config.types';
 
 export interface BusinessCentralConfig {
   tenantId: string;
@@ -25,9 +29,17 @@ export interface ApplicationConfig {
   frontendUrl: string;
 }
 
+export type NexusDataverseConfig = Omit<
+  DataverseConfig,
+  'authenticatedActor'
+> & {
+  readonly authenticatedActor?: DataverseConfig['authenticatedActor'];
+};
+
 export interface NexusConfig {
   application: ApplicationConfig;
   azure: AzureConfig;
-  dataverse: DataverseConfig;
+  dataverse: NexusDataverseConfig;
   businessCentral: BusinessCentralConfig;
+  readonly paymentNotifications?: PaymentNotificationsConfig;
 }

@@ -1,3 +1,6 @@
+import { REQUIRED_DATAVERSE_ENVIRONMENT_VARIABLES } from '../dataverse/dataverse-config.validator';
+import { REQUIRED_PAYMENT_NOTIFICATION_APPROVAL_ENVIRONMENT_VARIABLES } from '../payment-notifications/payment-notifications-config.validator';
+
 const REQUIRED_ENV_VARS = [
   'API_URL',
   'FRONTEND_URL',
@@ -6,7 +9,8 @@ const REQUIRED_ENV_VARS = [
   'AZURE_CLIENT_SECRET',
   'AZURE_KEY_VAULT_URL',
   'AZURE_STORAGE_ACCOUNT_NAME',
-  'DATAVERSE_ENVIRONMENT_URL',
+  ...REQUIRED_DATAVERSE_ENVIRONMENT_VARIABLES,
+  ...REQUIRED_PAYMENT_NOTIFICATION_APPROVAL_ENVIRONMENT_VARIABLES,
   'BC_TENANT_ID',
   'BC_ENVIRONMENT',
   'BC_COMPANY_ID',
@@ -14,12 +18,12 @@ const REQUIRED_ENV_VARS = [
 
 export const validateRequiredEnvironmentVariables = (): void => {
   const missingVariables = REQUIRED_ENV_VARS.filter(
-    (variableName) => !process.env[variableName]?.trim()
+    (variableName) => !process.env[variableName]?.trim(),
   );
 
   if (missingVariables.length > 0) {
     throw new Error(
-      `Missing required environment variables: ${missingVariables.join(', ')}`
+      `Missing required environment variables: ${missingVariables.join(', ')}`,
     );
   }
 };

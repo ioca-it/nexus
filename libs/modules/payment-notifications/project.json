@@ -1,0 +1,18 @@
+{
+  "name": "payment-notifications",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/payment-notifications/domain",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/modules/payment-notifications",
+        "main": "libs/modules/payment-notifications/domain/index.ts",
+        "tsConfig": "libs/modules/payment-notifications/tsconfig.lib.json"
+      }
+    }
+  }
+}

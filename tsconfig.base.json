@@ -16,7 +16,14 @@
     "strict": false,
     "paths": {
       "@nexus/config": ["./libs/config/src/index.ts"],
-      "@nexus/config/auth": ["./libs/config/src/auth/index.ts"]
+      "@nexus/config/auth": ["./libs/config/src/auth/index.ts"],
+      "@nexus/platform": ["./libs/platform/index.ts"],
+      "@nexus/modules/payment-notifications": [
+        "./libs/modules/payment-notifications/domain/index.ts"
+      ],
+      "@nexus/modules/payment-notifications/infrastructure": [
+        "./libs/modules/payment-notifications/infrastructure/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
