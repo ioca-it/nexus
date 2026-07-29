@@ -14,6 +14,7 @@ export interface AzureConfig {
 export type {
   AuthenticatedActorDataverseSchemaConfig,
   DataverseConfig,
+  FinanceCustomerReferenceDataverseSchemaConfig,
   PaymentNotificationDataverseSchemaConfig,
 } from '../dataverse/dataverse-config.types';
 export type { BusinessCentralConfig } from '../business-central/business-central-config.types';
@@ -27,9 +28,10 @@ export interface ApplicationConfig {
 
 export type NexusDataverseConfig = Omit<
   DataverseConfig,
-  'authenticatedActor'
+  'authenticatedActor' | 'finance'
 > & {
   readonly authenticatedActor?: DataverseConfig['authenticatedActor'];
+  readonly finance?: DataverseConfig['finance'];
 };
 
 export interface NexusConfig {

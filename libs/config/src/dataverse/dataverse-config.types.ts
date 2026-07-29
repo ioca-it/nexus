@@ -60,6 +60,15 @@ export interface AuthenticatedActorDataverseSchemaConfig {
   };
 }
 
+export interface FinanceCustomerReferenceDataverseSchemaConfig {
+  readonly customerEntitySet: string;
+  readonly customerFields: {
+    readonly nexusCustomerId: string;
+    readonly businessCentralCustomerId: string;
+    readonly active: string;
+  };
+}
+
 export interface DataverseConfig {
   readonly environmentUrl: string;
   readonly apiVersion: string;
@@ -68,5 +77,10 @@ export interface DataverseConfig {
   };
   readonly authenticatedActor: {
     readonly schema: AuthenticatedActorDataverseSchemaConfig;
+  };
+  readonly finance: {
+    readonly customerReference: {
+      readonly schema: FinanceCustomerReferenceDataverseSchemaConfig;
+    };
   };
 }

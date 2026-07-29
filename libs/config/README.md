@@ -58,6 +58,29 @@ DATAVERSE_NEXUS_APPROVAL_GROUP_MEMBER_FIELD_OID=
 DATAVERSE_NEXUS_APPROVAL_GROUP_MEMBER_FIELD_APPROVAL_GROUP_ID=
 ```
 
+## Dataverse Finance Customer Reference
+
+Este schema configura los nombres físicos necesarios para resolver la relación
+entre la empresa identificada por `NexusCustomerId` en NEXUS/Dataverse y su
+referencia `BusinessCentralCustomerId`. La relación pertenece a Dataverse y es
+independiente del schema de Authenticated Actor.
+
+Todas las variables son obligatorias, no tienen valores predeterminados y deben
+suministrarse por entorno:
+
+```dotenv
+DATAVERSE_FINANCE_CUSTOMER_ENTITY_SET=
+DATAVERSE_FINANCE_CUSTOMER_FIELD_NEXUS_CUSTOMER_ID=
+DATAVERSE_FINANCE_CUSTOMER_FIELD_BUSINESS_CENTRAL_CUSTOMER_ID=
+DATAVERSE_FINANCE_CUSTOMER_FIELD_ACTIVE=
+```
+
+La configuración no asume igualdad entre ambos identificadores ni permite
+inferir la relación desde nombres, correos, datos fiscales o comerciales. Los
+nombres físicos reales y cualquier valor productivo deben permanecer en la
+configuración segura del entorno. No deben almacenarse secretos ni valores
+productivos en archivos versionados.
+
 ## Payment Notifications approval groups
 
 Cada acción con aprobación requiere su propia lista de identificadores de

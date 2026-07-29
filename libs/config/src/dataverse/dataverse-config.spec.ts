@@ -99,6 +99,12 @@ const validDataverseEnvironment: EnvironmentVariables = Object.freeze({
     authenticatedActorSchema.approvalGroupMember.fields.oid,
   DATAVERSE_NEXUS_APPROVAL_GROUP_MEMBER_FIELD_APPROVAL_GROUP_ID:
     authenticatedActorSchema.approvalGroupMember.fields.approvalGroupId,
+  DATAVERSE_FINANCE_CUSTOMER_ENTITY_SET: 'test_finance_customers',
+  DATAVERSE_FINANCE_CUSTOMER_FIELD_NEXUS_CUSTOMER_ID:
+    'test_finance_nexus_customer_id',
+  DATAVERSE_FINANCE_CUSTOMER_FIELD_BUSINESS_CENTRAL_CUSTOMER_ID:
+    'test_finance_business_central_customer_id',
+  DATAVERSE_FINANCE_CUSTOMER_FIELD_ACTIVE: 'test_finance_customer_active',
 });
 
 const completeApplicationEnvironment: EnvironmentVariables = Object.freeze({

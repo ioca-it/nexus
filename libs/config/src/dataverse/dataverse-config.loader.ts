@@ -3,6 +3,7 @@ import type { EnvironmentVariables } from '../shared/environment-variables';
 import type {
   AuthenticatedActorDataverseSchemaConfig,
   DataverseConfig,
+  FinanceCustomerReferenceDataverseSchemaConfig,
   PaymentNotificationDataverseSchemaConfig,
 } from './dataverse-config.types';
 import { validateDataverseEnvironment } from './dataverse-config.validator';
@@ -80,6 +81,18 @@ export const loadDataverseConfig = (
       }),
     });
 
+  const financeCustomerReferenceSchema: FinanceCustomerReferenceDataverseSchemaConfig =
+    Object.freeze({
+      customerEntitySet: values.DATAVERSE_FINANCE_CUSTOMER_ENTITY_SET,
+      customerFields: Object.freeze({
+        nexusCustomerId:
+          values.DATAVERSE_FINANCE_CUSTOMER_FIELD_NEXUS_CUSTOMER_ID,
+        businessCentralCustomerId:
+          values.DATAVERSE_FINANCE_CUSTOMER_FIELD_BUSINESS_CENTRAL_CUSTOMER_ID,
+        active: values.DATAVERSE_FINANCE_CUSTOMER_FIELD_ACTIVE,
+      }),
+    });
+
   return Object.freeze({
     environmentUrl: values.DATAVERSE_ENVIRONMENT_URL,
     apiVersion:
@@ -90,6 +103,11 @@ export const loadDataverseConfig = (
     }),
     authenticatedActor: Object.freeze({
       schema: authenticatedActorSchema,
+    }),
+    finance: Object.freeze({
+      customerReference: Object.freeze({
+        schema: financeCustomerReferenceSchema,
+      }),
     }),
   });
 };

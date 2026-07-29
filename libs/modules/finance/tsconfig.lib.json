@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node"],
+    "paths": {
+      "@nexus/platform": ["../../../dist/libs/platform/index.d.ts"]
+    }
+  },
+  "include": [
+    "index.ts",
+    "domain/**/*.ts",
+    "application/**/*.ts",
+    "infrastructure/**/*.ts"
+  ],
+  "exclude": [
+    "domain/**/*.spec.ts",
+    "domain/**/*.test.ts",
+    "application/**/*.spec.ts",
+    "application/**/*.test.ts",
+    "infrastructure/**/*.spec.ts",
+    "infrastructure/**/*.test.ts"
+  ]
+}

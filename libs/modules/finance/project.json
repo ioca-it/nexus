@@ -1,0 +1,18 @@
+{
+  "name": "finance",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/finance",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/modules/finance",
+        "main": "libs/modules/finance/index.ts",
+        "tsConfig": "libs/modules/finance/tsconfig.lib.json"
+      }
+    }
+  }
+}
