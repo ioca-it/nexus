@@ -115,9 +115,13 @@ const completeApplicationEnvironment: EnvironmentVariables = Object.freeze({
   PAYMENT_NOTIFICATIONS_VALIDATE_APPROVAL_GROUP_IDS: 'GROUP-A',
   PAYMENT_NOTIFICATIONS_REJECT_APPROVAL_GROUP_IDS: 'GROUP-B',
   PAYMENT_NOTIFICATIONS_REQUEST_CHANGES_APPROVAL_GROUP_IDS: 'GROUP-C',
-  BC_TENANT_ID: 'test-bc-tenant',
-  BC_ENVIRONMENT: 'test-bc-environment',
-  BC_COMPANY_ID: 'test-bc-company',
+  BUSINESS_CENTRAL_TENANT_ID: 'test-bc-tenant',
+  BUSINESS_CENTRAL_CLIENT_ID: 'test-bc-client',
+  BUSINESS_CENTRAL_CLIENT_SECRET: 'test-bc-secret',
+  BUSINESS_CENTRAL_RESOURCE_URL: 'https://resource.example.test',
+  BUSINESS_CENTRAL_ENVIRONMENT_NAME: 'test-bc-environment',
+  BUSINESS_CENTRAL_COMPANY_ID: 'test-bc-company',
+  BUSINESS_CENTRAL_API_VERSION: 'test-bc-version',
 });
 
 const requiredFieldVariables = REQUIRED_DATAVERSE_ENVIRONMENT_VARIABLES.filter(
@@ -325,8 +329,12 @@ describe('Dataverse configuration', () => {
 
     expect(config.businessCentral).toEqual({
       tenantId: 'test-bc-tenant',
-      environment: 'test-bc-environment',
+      clientId: 'test-bc-client',
+      clientSecret: 'test-bc-secret',
+      resourceUrl: 'https://resource.example.test',
+      environmentName: 'test-bc-environment',
       companyId: 'test-bc-company',
+      apiVersion: 'test-bc-version',
     });
   });
 });

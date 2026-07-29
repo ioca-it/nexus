@@ -159,8 +159,12 @@ const config: NexusConfig = Object.freeze({
   }),
   businessCentral: Object.freeze({
     tenantId: 'test-bc-tenant',
-    environment: 'test-bc-environment',
+    clientId: 'test-bc-client',
+    clientSecret: 'test-bc-secret',
+    resourceUrl: 'https://resource.example.test',
+    environmentName: 'test-bc-environment',
     companyId: 'test-bc-company',
+    apiVersion: 'test-bc-version',
   }),
   paymentNotifications: Object.freeze({
     approvals: Object.freeze({

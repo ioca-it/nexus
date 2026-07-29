@@ -73,6 +73,40 @@ PAYMENT_NOTIFICATIONS_REQUEST_CHANGES_APPROVAL_GROUP_IDS=GROUP-D,GROUP-E
 Los identificadores anteriores son ejemplos exclusivos de configuración. Los
 valores reales deben suministrarse para cada entorno.
 
+## Business Central
+
+Business Central utiliza una identidad y un tenant independientes de la
+identidad principal de NEXUS. Los siete valores son obligatorios, no tienen
+valores predeterminados y deben suministrarse mediante configuración segura por
+entorno:
+
+```dotenv
+BUSINESS_CENTRAL_TENANT_ID=
+BUSINESS_CENTRAL_CLIENT_ID=
+BUSINESS_CENTRAL_CLIENT_SECRET=
+BUSINESS_CENTRAL_RESOURCE_URL=
+BUSINESS_CENTRAL_ENVIRONMENT_NAME=
+BUSINESS_CENTRAL_COMPANY_ID=
+BUSINESS_CENTRAL_API_VERSION=
+```
+
+- `BUSINESS_CENTRAL_TENANT_ID`: tenant donde reside Business Central.
+- `BUSINESS_CENTRAL_CLIENT_ID`: identidad de aplicación para autenticación
+  saliente.
+- `BUSINESS_CENTRAL_CLIENT_SECRET`: credencial de la identidad de aplicación.
+- `BUSINESS_CENTRAL_RESOURCE_URL`: recurso utilizado para construir el scope de
+  autenticación.
+- `BUSINESS_CENTRAL_ENVIRONMENT_NAME`: ambiente de Business Central.
+- `BUSINESS_CENTRAL_COMPANY_ID`: compañía objetivo, expresada mediante su
+  identificador configurado.
+- `BUSINESS_CENTRAL_API_VERSION`: versión requerida por la futura integración.
+
+El secreto `bc-tenant-id` debe resolverse mediante el mecanismo seguro de
+configuración de cada entorno. No se consulta Key Vault desde esta librería.
+Los secretos no deben almacenarse en archivos versionados ni compartirse con
+`config.azure` o la identidad JWT entrante. No se documentan aquí valores
+productivos.
+
 ## Building
 
 Run `nx build config` to build the library.

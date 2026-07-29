@@ -1,3 +1,4 @@
+import { loadBusinessCentralConfig } from '../business-central/business-central-config.loader';
 import { loadDataverseConfig } from '../dataverse/dataverse-config.loader';
 import { loadPaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.loader';
 import type { NexusConfig } from '../types/config.types';
@@ -21,10 +22,6 @@ export const loadAppConfig = (): NexusConfig => ({
     ),
   },
   dataverse: loadDataverseConfig(),
-  businessCentral: {
-    tenantId: envLoader.getRequired('BC_TENANT_ID'),
-    environment: envLoader.getRequired('BC_ENVIRONMENT'),
-    companyId: envLoader.getRequired('BC_COMPANY_ID'),
-  },
+  businessCentral: loadBusinessCentralConfig(),
   paymentNotifications: loadPaymentNotificationsConfig(),
 });

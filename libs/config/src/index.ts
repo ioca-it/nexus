@@ -4,5 +4,6 @@ export * from './types/config.types';
 export * from './loaders';
 export * from './validators';
 export * from './services';
+export * from './business-central';
 export * from './dataverse';
 export * from './payment-notifications';

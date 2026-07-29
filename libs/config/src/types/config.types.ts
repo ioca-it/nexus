@@ -1,3 +1,4 @@
+import type { BusinessCentralConfig } from '../business-central/business-central-config.types';
 import type { DataverseConfig } from '../dataverse/dataverse-config.types';
 import type { PaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.types';
 
@@ -15,12 +16,7 @@ export type {
   DataverseConfig,
   PaymentNotificationDataverseSchemaConfig,
 } from '../dataverse/dataverse-config.types';
-
-export interface BusinessCentralConfig {
-  tenantId: string;
-  environment: string;
-  companyId: string;
-}
+export type { BusinessCentralConfig } from '../business-central/business-central-config.types';
 
 export interface ApplicationConfig {
   nodeEnv: string;

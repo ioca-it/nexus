@@ -38,9 +38,13 @@ const completeApplicationEnvironment: EnvironmentVariables = Object.freeze({
   AZURE_CLIENT_SECRET: 'test-client-secret',
   AZURE_KEY_VAULT_URL: 'https://vault.example.test',
   AZURE_STORAGE_ACCOUNT_NAME: 'teststorage',
-  BC_TENANT_ID: 'test-bc-tenant',
-  BC_ENVIRONMENT: 'test-bc-environment',
-  BC_COMPANY_ID: 'test-bc-company',
+  BUSINESS_CENTRAL_TENANT_ID: 'test-bc-tenant',
+  BUSINESS_CENTRAL_CLIENT_ID: 'test-bc-client',
+  BUSINESS_CENTRAL_CLIENT_SECRET: 'test-bc-secret',
+  BUSINESS_CENTRAL_RESOURCE_URL: 'https://resource.example.test',
+  BUSINESS_CENTRAL_ENVIRONMENT_NAME: 'test-bc-environment',
+  BUSINESS_CENTRAL_COMPANY_ID: 'test-bc-company',
+  BUSINESS_CENTRAL_API_VERSION: 'test-bc-version',
 });
 
 function withProcessEnvironment<T>(
@@ -206,8 +210,12 @@ describe('Payment Notifications approval configuration', () => {
     );
     expect(config.businessCentral).toEqual({
       tenantId: 'test-bc-tenant',
-      environment: 'test-bc-environment',
+      clientId: 'test-bc-client',
+      clientSecret: 'test-bc-secret',
+      resourceUrl: 'https://resource.example.test',
+      environmentName: 'test-bc-environment',
       companyId: 'test-bc-company',
+      apiVersion: 'test-bc-version',
     });
   });
 
