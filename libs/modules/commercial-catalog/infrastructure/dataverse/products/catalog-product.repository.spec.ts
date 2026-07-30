@@ -6,6 +6,7 @@ const record = Object.freeze({
   id: 'product-1',
   number: 'P-001',
   name: 'Product one',
+  ecommerceUrl: 'https://shop.example.test/products/P-001',
   active: true,
 });
 
@@ -31,6 +32,9 @@ describe('DataverseCatalogProductRepository', () => {
     expect(gateway.findById).toHaveBeenCalledTimes(1);
     expect(gateway.findById).toHaveBeenCalledWith(id);
     expect(result?.id).toBe(id);
+    expect(result?.ecommerceUrl).toBe(
+      'https://shop.example.test/products/P-001',
+    );
     expect(Object.isFrozen(result)).toBe(true);
   });
 
@@ -51,6 +55,9 @@ describe('DataverseCatalogProductRepository', () => {
 
     expect(gateway.findActive).toHaveBeenCalledTimes(1);
     expect(result).toHaveLength(1);
+    expect(result[0]?.ecommerceUrl).toBe(
+      'https://shop.example.test/products/P-001',
+    );
     expect(Object.isFrozen(result)).toBe(true);
   });
 

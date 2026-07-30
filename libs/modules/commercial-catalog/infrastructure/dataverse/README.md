@@ -12,6 +12,11 @@ in Dataverse once, then evaluate optional `validFrom` and `validTo` bounds over
 the single validated collection in memory. Empty optional physical strings are
 normalized to `undefined`.
 
+The optional product `ecommerceUrl` is read only through its configured
+physical field. Missing, null, and empty values normalize to `undefined`;
+present values must satisfy the Domain HTTPS policy. The adapter returns the
+validated value unchanged and never constructs a URL or adds parameters.
+
 Multiple effective prices for the same customer and product are a configuration
 inconsistency and are never selected arbitrarily. Domain creation remains
 authoritative in `createCatalogProduct()` and `createCustomerPrice()`.
@@ -22,6 +27,7 @@ authoritative in `createCatalogProduct()` and `createCustomerPrice()`.
 | ----------------------------- | ------------------------------------------------------- |
 | Physical records and schemas  | `common/commercial-catalog-dataverse.types.ts`          |
 | Physical validation           | `common/commercial-catalog-dataverse.validators.ts`     |
+| Ecommerce URL safety policy   | `domain/safe-ecommerce-url.ts`                          |
 | Product gateway and mapping   | `products/dataverse-catalog-product.gateway.ts`, mapper |
 | Product repository            | `products/catalog-product.repository.ts`                |
 | Price gateway and validity    | `customer-prices/dataverse-customer-price.gateway.ts`   |
@@ -34,6 +40,9 @@ retain the explicit application clock input. Add a query through the gateway
 contract without extending the client unless separately approved. Future
 inventory belongs to a distinct Business Central adapter and composition step,
 not these records.
+
+Changing ecommerce URL policy requires coordinated changes to the Domain
+policy, physical validator, product mapper, HTTP mapper, and focused tests.
 
 This infrastructure is read-only. Do not add create, update, delete, price
 calculation, authorization, inventory, or Dataverse writes without an approved

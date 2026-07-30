@@ -23,6 +23,7 @@ function createModels() {
     categoryId: 'category-1',
     imageReference: 'image-1',
     unitOfMeasureCode: 'EA',
+    ecommerceUrl: 'https://shop.example.test/products/P-001?view=full',
     active: true,
   });
   const price = createCustomerPrice({
@@ -54,6 +55,7 @@ describe('Commercial Catalog response mappers', () => {
       categoryId: 'category-1',
       imageReference: 'image-1',
       unitOfMeasureCode: 'EA',
+      ecommerceUrl: 'https://shop.example.test/products/P-001?view=full',
     });
     expect(response).not.toHaveProperty('active');
     expect(Object.isFrozen(response)).toBe(true);
@@ -96,6 +98,7 @@ describe('Commercial Catalog response mappers', () => {
         categoryId: 'category-1',
         imageReference: 'image-1',
         unitOfMeasureCode: 'EA',
+        ecommerceUrl: 'https://shop.example.test/products/P-001?view=full',
       },
       price: {
         currencyCode: 'USD',
@@ -133,6 +136,7 @@ describe('Commercial Catalog response mappers', () => {
     const response = toCatalogItemResponse(createCatalogItem(product, price));
 
     expect(response.product).not.toHaveProperty('description');
+    expect(response.product).not.toHaveProperty('ecommerceUrl');
     expect(response.price).not.toHaveProperty('minimumQuantity');
     expect(response.price).not.toHaveProperty('validFrom');
     expect(response.price).not.toHaveProperty('validTo');

@@ -117,6 +117,8 @@ const validDataverseEnvironment: EnvironmentVariables = Object.freeze({
     'test_product_image_reference',
   DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE:
     'test_product_unit_of_measure_code',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL:
+    'test_product_ecommerce_url',
   DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE: 'test_product_active',
   DATAVERSE_COMMERCIAL_CATALOG_PRICE_ENTITY_SET: 'test_catalog_customer_prices',
   DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ID: 'test_price_id',
@@ -131,6 +133,25 @@ const validDataverseEnvironment: EnvironmentVariables = Object.freeze({
   DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_FROM: 'test_price_valid_from',
   DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_TO: 'test_price_valid_to',
   DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ACTIVE: 'test_price_active',
+  DATAVERSE_ORDERS_ENTITY_SET: 'test_orders',
+  DATAVERSE_ORDERS_FIELD_ID: 'test_order_id',
+  DATAVERSE_ORDERS_FIELD_CUSTOMER_ID: 'test_order_customer_id',
+  DATAVERSE_ORDERS_FIELD_STATUS: 'test_order_status',
+  DATAVERSE_ORDERS_FIELD_CURRENCY_CODE: 'test_order_currency_code',
+  DATAVERSE_ORDERS_FIELD_SUBTOTAL: 'test_order_subtotal',
+  DATAVERSE_ORDERS_FIELD_CREATED_AT: 'test_order_created_at',
+  DATAVERSE_ORDERS_FIELD_UPDATED_AT: 'test_order_updated_at',
+  DATAVERSE_ORDER_LINES_ENTITY_SET: 'test_order_lines',
+  DATAVERSE_ORDER_LINES_FIELD_ID: 'test_order_line_id',
+  DATAVERSE_ORDER_LINES_FIELD_ORDER_ID: 'test_order_line_order_id',
+  DATAVERSE_ORDER_LINES_FIELD_PRODUCT_ID: 'test_order_line_product_id',
+  DATAVERSE_ORDER_LINES_FIELD_PRODUCT_NUMBER: 'test_order_line_product_number',
+  DATAVERSE_ORDER_LINES_FIELD_PRODUCT_NAME: 'test_order_line_product_name',
+  DATAVERSE_ORDER_LINES_FIELD_UNIT_OF_MEASURE_CODE: 'test_order_line_uom',
+  DATAVERSE_ORDER_LINES_FIELD_CURRENCY_CODE: 'test_order_line_currency_code',
+  DATAVERSE_ORDER_LINES_FIELD_QUANTITY: 'test_order_line_quantity',
+  DATAVERSE_ORDER_LINES_FIELD_UNIT_PRICE: 'test_order_line_unit_price',
+  DATAVERSE_ORDER_LINES_FIELD_LINE_SUBTOTAL: 'test_order_line_subtotal',
 });
 
 const completeApplicationEnvironment: EnvironmentVariables = Object.freeze({

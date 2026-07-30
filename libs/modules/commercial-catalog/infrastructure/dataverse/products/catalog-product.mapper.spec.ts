@@ -10,6 +10,7 @@ describe('toCatalogProduct', () => {
       categoryId: ' Category ',
       imageReference: ' Image ',
       unitOfMeasureCode: ' EA ',
+      ecommerceUrl: ' https://shop.example.test/products/P-001 ',
       active: true,
     });
     const snapshot = { ...record };
@@ -24,6 +25,7 @@ describe('toCatalogProduct', () => {
       categoryId: 'Category',
       imageReference: 'Image',
       unitOfMeasureCode: 'EA',
+      ecommerceUrl: 'https://shop.example.test/products/P-001',
       active: true,
     });
     expect(Object.isFrozen(result)).toBe(true);

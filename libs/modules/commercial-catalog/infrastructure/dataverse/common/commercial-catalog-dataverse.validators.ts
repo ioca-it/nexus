@@ -5,6 +5,7 @@ import type {
   DataverseCatalogProductSchema,
   DataverseCustomerPriceSchema,
 } from './commercial-catalog-dataverse.types';
+import { validateSafeEcommerceUrl } from '../../../domain/safe-ecommerce-url';
 
 function invalidRecord(resource: string, fieldName: string): never {
   throw new Error(
@@ -131,6 +132,20 @@ export function validateCatalogProductRecord(
     fields.unitOfMeasureCode,
     'product',
   );
+  const rawEcommerceUrl = optionalString(
+    record,
+    fields.ecommerceUrl,
+    'product',
+  );
+  let ecommerceUrl: string | undefined;
+
+  if (rawEcommerceUrl !== undefined) {
+    try {
+      ecommerceUrl = validateSafeEcommerceUrl(rawEcommerceUrl);
+    } catch {
+      return invalidRecord('product', fields.ecommerceUrl);
+    }
+  }
 
   return Object.freeze({
     id: requiredString(record, fields.id, 'product'),
@@ -140,6 +155,7 @@ export function validateCatalogProductRecord(
     ...(categoryId === undefined ? {} : { categoryId }),
     ...(imageReference === undefined ? {} : { imageReference }),
     ...(unitOfMeasureCode === undefined ? {} : { unitOfMeasureCode }),
+    ...(ecommerceUrl === undefined ? {} : { ecommerceUrl }),
     active: requiredBoolean(record, fields.active, 'product'),
   });
 }

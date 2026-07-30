@@ -80,6 +80,7 @@ const productSchema = Object.freeze({
     categoryId: 'configured_product_category',
     imageReference: 'configured_product_image',
     unitOfMeasureCode: 'configured_product_uom',
+    ecommerceUrl: 'configured_product_ecommerce_url',
     active: 'configured_product_active',
   }),
 });

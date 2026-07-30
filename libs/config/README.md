@@ -98,6 +98,7 @@ DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_DESCRIPTION=
 DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_CATEGORY_ID=
 DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE=
 DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL=
 DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE=
 
 DATAVERSE_COMMERCIAL_CATALOG_PRICE_ENTITY_SET=
@@ -117,6 +118,22 @@ entorno. Para agregar un campo físico, deben actualizarse conjuntamente
 `dataverse-config.types.ts`, `dataverse-config.validator.ts`,
 `dataverse-config.loader.ts` y las pruebas específicas del schema. No deben
 incorporarse nombres productivos ni secretos al repositorio.
+
+### AI maintenance map
+
+| Concern                        | Authoritative files                               |
+| ------------------------------ | ------------------------------------------------- |
+| Physical product field names   | `src/dataverse/dataverse-config.types.ts`         |
+| Required environment names     | `src/dataverse/dataverse-config.validator.ts`     |
+| Frozen schema construction     | `src/dataverse/dataverse-config.loader.ts`        |
+| Commercial Catalog schema test | `src/dataverse/commercial-catalog-config.spec.ts` |
+
+`DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL` configura
+exclusivamente el nombre de la columna física de Dataverse. Es obligatorio, no
+tiene valor predeterminado y los archivos versionados no deben fijar un nombre
+productivo. El valor de la columna puede faltar en un producto. La validación
+HTTPS pertenece al dominio Commercial Catalog y a su validador Dataverse, no a
+Config.
 
 ## Payment Notifications approval groups
 
@@ -174,3 +191,7 @@ Run `nx build config` to build the library.
 ## Running unit tests
 
 Run `nx test config` to execute the unit tests via [Jest](https://jestjs.io).
+
+## Orders Dataverse Schema
+
+Orders configuration defines configurable entity sets and fields for Orders and OrderLines. Dataverse is the authorized source; Commercial Catalog remains the source for products/prices and Business Central remains reserved for future inventory. To add a field, update orders-config.types.ts, loader, validator environment list, tests, and the Orders infrastructure schema adapter. Physical names remain environment-owned and are never documented here.

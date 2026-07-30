@@ -15,6 +15,7 @@ export function toCatalogProduct(record: CatalogProductRecord): CatalogProduct {
     categoryId: record.categoryId,
     imageReference: record.imageReference,
     unitOfMeasureCode: record.unitOfMeasureCode,
+    ecommerceUrl: record.ecommerceUrl,
     active: record.active,
   });
 }

@@ -1,0 +1,1 @@
+Orders HTTP requests contain only client-editable currency and line identifiers/quantities. Customer, prices, product descriptions, status and totals are controlled by the actor, Commercial Catalog and application layer.

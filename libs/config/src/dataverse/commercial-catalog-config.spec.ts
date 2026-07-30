@@ -24,6 +24,7 @@ interface FutureCommercialCatalogGatewaySchema {
       readonly categoryId: string;
       readonly imageReference: string;
       readonly unitOfMeasureCode: string;
+      readonly ecommerceUrl: string;
       readonly active: string;
     };
   };
@@ -56,6 +57,8 @@ const PRODUCT_VALUES = Object.freeze({
     'test_product_image_reference',
   DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE:
     'test_product_unit_of_measure_code',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL:
+    'test_product_ecommerce_url',
   DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE: 'test_product_active',
 });
 
@@ -170,6 +173,8 @@ describe('Dataverse Commercial Catalog configuration', () => {
           PRODUCT_VALUES.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE,
         unitOfMeasureCode:
           PRODUCT_VALUES.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE,
+        ecommerceUrl:
+          PRODUCT_VALUES.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL,
         active:
           PRODUCT_VALUES.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE,
       },
@@ -340,5 +345,8 @@ describe('Dataverse Commercial Catalog configuration', () => {
     expect(serialized).not.toMatch(
       /inventory|availableQuantity|secret|token|tenant|companyId/i,
     );
+    expect(
+      Object.values(PRODUCT_VALUES).every((value) => value.startsWith('test_')),
+    ).toBe(true);
   });
 });

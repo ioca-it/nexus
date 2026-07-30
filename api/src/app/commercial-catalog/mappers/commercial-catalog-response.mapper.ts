@@ -29,6 +29,9 @@ export function toCatalogProductResponse(
     ...(product.unitOfMeasureCode === undefined
       ? {}
       : { unitOfMeasureCode: product.unitOfMeasureCode }),
+    ...(product.ecommerceUrl === undefined
+      ? {}
+      : { ecommerceUrl: product.ecommerceUrl }),
   });
 }
 

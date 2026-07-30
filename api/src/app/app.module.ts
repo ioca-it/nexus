@@ -8,6 +8,7 @@ import { AuthenticatedActorModule } from './authenticated-actor';
 import { CommercialCatalogModule } from './commercial-catalog';
 import { FinanceModule } from './finance';
 import { PaymentNotificationsModule } from './payment-notifications';
+import { OrdersModule } from './orders';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PaymentNotificationsModule } from './payment-notifications';
     AuthenticatedActorModule,
     FinanceModule,
     CommercialCatalogModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

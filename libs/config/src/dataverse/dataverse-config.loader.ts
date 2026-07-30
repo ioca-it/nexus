@@ -7,6 +7,7 @@ import type {
   FinanceCustomerReferenceDataverseSchemaConfig,
   PaymentNotificationDataverseSchemaConfig,
 } from './dataverse-config.types';
+import type { OrdersDataverseSchemaConfig } from './orders-config.types';
 import { validateDataverseEnvironment } from './dataverse-config.validator';
 
 const DEFAULT_DATAVERSE_API_VERSION = 'v9.2';
@@ -110,6 +111,8 @@ export const loadDataverseConfig = (
             values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE,
           unitOfMeasureCode:
             values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE,
+          ecommerceUrl:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ECOMMERCE_URL,
           active: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE,
         }),
       }),
@@ -132,6 +135,37 @@ export const loadDataverseConfig = (
       }),
     });
 
+  const ordersSchema: OrdersDataverseSchemaConfig = Object.freeze({
+    order: Object.freeze({
+      entitySet: values.DATAVERSE_ORDERS_ENTITY_SET,
+      fields: Object.freeze({
+        id: values.DATAVERSE_ORDERS_FIELD_ID,
+        customerId: values.DATAVERSE_ORDERS_FIELD_CUSTOMER_ID,
+        status: values.DATAVERSE_ORDERS_FIELD_STATUS,
+        currencyCode: values.DATAVERSE_ORDERS_FIELD_CURRENCY_CODE,
+        subtotal: values.DATAVERSE_ORDERS_FIELD_SUBTOTAL,
+        createdAt: values.DATAVERSE_ORDERS_FIELD_CREATED_AT,
+        updatedAt: values.DATAVERSE_ORDERS_FIELD_UPDATED_AT,
+      }),
+    }),
+    orderLine: Object.freeze({
+      entitySet: values.DATAVERSE_ORDER_LINES_ENTITY_SET,
+      fields: Object.freeze({
+        id: values.DATAVERSE_ORDER_LINES_FIELD_ID,
+        orderId: values.DATAVERSE_ORDER_LINES_FIELD_ORDER_ID,
+        productId: values.DATAVERSE_ORDER_LINES_FIELD_PRODUCT_ID,
+        productNumber: values.DATAVERSE_ORDER_LINES_FIELD_PRODUCT_NUMBER,
+        productName: values.DATAVERSE_ORDER_LINES_FIELD_PRODUCT_NAME,
+        unitOfMeasureCode:
+          values.DATAVERSE_ORDER_LINES_FIELD_UNIT_OF_MEASURE_CODE,
+        currencyCode: values.DATAVERSE_ORDER_LINES_FIELD_CURRENCY_CODE,
+        quantity: values.DATAVERSE_ORDER_LINES_FIELD_QUANTITY,
+        unitPrice: values.DATAVERSE_ORDER_LINES_FIELD_UNIT_PRICE,
+        lineSubtotal: values.DATAVERSE_ORDER_LINES_FIELD_LINE_SUBTOTAL,
+      }),
+    }),
+  });
+
   return Object.freeze({
     environmentUrl: values.DATAVERSE_ENVIRONMENT_URL,
     apiVersion:
@@ -151,5 +185,6 @@ export const loadDataverseConfig = (
     commercialCatalog: Object.freeze({
       schema: commercialCatalogSchema,
     }),
+    orders: Object.freeze({ schema: ordersSchema }),
   });
 };

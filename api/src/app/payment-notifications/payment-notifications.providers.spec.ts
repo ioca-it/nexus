@@ -156,6 +156,37 @@ const config: NexusConfig = Object.freeze({
     environmentUrl: ' https://example.crm.dynamics.com/// ',
     apiVersion: ' /v9.2/ ',
     paymentNotifications: Object.freeze({ schema }),
+    orders: Object.freeze({
+      schema: Object.freeze({
+        order: Object.freeze({
+          entitySet: 'orders',
+          fields: Object.freeze({
+            id: 'id',
+            customerId: 'customerId',
+            status: 'status',
+            currencyCode: 'currencyCode',
+            subtotal: 'subtotal',
+            createdAt: 'createdAt',
+            updatedAt: 'updatedAt',
+          }),
+        }),
+        orderLine: Object.freeze({
+          entitySet: 'orderLines',
+          fields: Object.freeze({
+            id: 'id',
+            orderId: 'orderId',
+            productId: 'productId',
+            productNumber: 'productNumber',
+            productName: 'productName',
+            unitOfMeasureCode: 'unitOfMeasureCode',
+            currencyCode: 'currencyCode',
+            quantity: 'quantity',
+            unitPrice: 'unitPrice',
+            lineSubtotal: 'lineSubtotal',
+          }),
+        }),
+      }),
+    }),
   }),
   businessCentral: Object.freeze({
     tenantId: 'test-bc-tenant',

@@ -1,0 +1,18 @@
+export const ORDERS_DATAVERSE_CLIENT = Symbol('ORDERS_DATAVERSE_CLIENT');
+export const ORDERS_GATEWAY = Symbol('ORDERS_GATEWAY');
+export const ORDER_LINES_GATEWAY = Symbol('ORDER_LINES_GATEWAY');
+export const ORDERS_REPOSITORY = Symbol('ORDERS_REPOSITORY');
+export const ORDERS_CATALOG_RESOLVER = Symbol('ORDERS_CATALOG_RESOLVER');
+export const ORDERS_CLOCK = Symbol('ORDERS_CLOCK');
+export const CREATE_DRAFT_ORDER_USE_CASE = Symbol(
+  'CREATE_DRAFT_ORDER_USE_CASE',
+);
+export const UPDATE_DRAFT_ORDER_LINES_USE_CASE = Symbol(
+  'UPDATE_DRAFT_ORDER_LINES_USE_CASE',
+);
+export const GET_ORDER_BY_ID_USE_CASE = Symbol('GET_ORDER_BY_ID_USE_CASE');
+export const LIST_CUSTOMER_ORDERS_USE_CASE = Symbol(
+  'LIST_CUSTOMER_ORDERS_USE_CASE',
+);
+export const ORDER_ID_GENERATOR = Symbol('ORDER_ID_GENERATOR');
+export type OrderIdGenerator = () => string;

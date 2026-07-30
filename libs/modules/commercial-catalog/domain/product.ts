@@ -4,6 +4,7 @@ import {
   type CatalogProductId,
   type CatalogProductNumber,
 } from './catalog.types';
+import { validateSafeEcommerceUrl } from './safe-ecommerce-url';
 
 export interface CatalogProduct {
   readonly id: CatalogProductId;
@@ -13,6 +14,7 @@ export interface CatalogProduct {
   readonly categoryId?: string;
   readonly imageReference?: string;
   readonly unitOfMeasureCode?: string;
+  readonly ecommerceUrl?: string;
   readonly active: boolean;
 }
 
@@ -24,6 +26,7 @@ export interface CreateCatalogProductInput {
   readonly categoryId?: string;
   readonly imageReference?: string;
   readonly unitOfMeasureCode?: string;
+  readonly ecommerceUrl?: string;
   readonly active: boolean;
 }
 
@@ -52,6 +55,10 @@ export function createCatalogProduct(
   const categoryId = optionalString(input.categoryId);
   const imageReference = optionalString(input.imageReference);
   const unitOfMeasureCode = optionalString(input.unitOfMeasureCode);
+  const ecommerceUrl =
+    input.ecommerceUrl === undefined
+      ? undefined
+      : validateSafeEcommerceUrl(input.ecommerceUrl);
 
   return Object.freeze({
     id: createCatalogProductId(input.id),
@@ -61,6 +68,7 @@ export function createCatalogProduct(
     ...(categoryId === undefined ? {} : { categoryId }),
     ...(imageReference === undefined ? {} : { imageReference }),
     ...(unitOfMeasureCode === undefined ? {} : { unitOfMeasureCode }),
+    ...(ecommerceUrl === undefined ? {} : { ecommerceUrl }),
     active: input.active,
   });
 }

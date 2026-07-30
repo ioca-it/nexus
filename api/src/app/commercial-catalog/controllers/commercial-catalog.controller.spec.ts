@@ -42,6 +42,7 @@ function catalogItem() {
     number: createCatalogProductNumber('P-001'),
     name: 'Product one',
     description: 'Description',
+    ecommerceUrl: 'https://shop.example.test/products/P-001',
     active: true,
   });
   const price = createCustomerPrice({
@@ -127,6 +128,9 @@ describe('CommercialCatalogController', () => {
     ).not.toHaveProperty('customerId');
     expect(response).toHaveLength(1);
     expect(response[0]).not.toBe(item);
+    expect(response[0]?.product.ecommerceUrl).toBe(
+      'https://shop.example.test/products/P-001',
+    );
     expect(Object.isFrozen(response)).toBe(true);
     expect(JSON.stringify(response)).not.toMatch(
       /customerId|productId|active|inventory|availableQuantity/i,
@@ -148,6 +152,9 @@ describe('CommercialCatalogController', () => {
     ).not.toHaveProperty('customerId');
     expect(response).not.toBe(item);
     expect(response.product.id).toBe('product-1');
+    expect(response.product.ecommerceUrl).toBe(
+      'https://shop.example.test/products/P-001',
+    );
   });
 
   it('converts an unauthorized or missing product to a generic 404', async () => {

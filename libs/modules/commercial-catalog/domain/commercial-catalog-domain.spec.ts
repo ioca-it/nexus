@@ -71,6 +71,45 @@ describe('Commercial Catalog domain', () => {
     ).toThrow();
   });
 
+  it('keeps a product without ecommerceUrl valid', () => {
+    const product = createCatalogProduct(productInput());
+
+    expect(product).not.toHaveProperty('ecommerceUrl');
+  });
+
+  it('trims and preserves an absolute HTTPS ecommerceUrl without modifying input', () => {
+    const input = Object.freeze({
+      ...productInput(),
+      ecommerceUrl: ' https://shop.example.test/products/P-001?view=full ',
+    });
+
+    const product = createCatalogProduct(input);
+
+    expect(product.ecommerceUrl).toBe(
+      'https://shop.example.test/products/P-001?view=full',
+    );
+    expect(Object.isFrozen(product)).toBe(true);
+    expect(input.ecommerceUrl).toBe(
+      ' https://shop.example.test/products/P-001?view=full ',
+    );
+  });
+
+  it.each([
+    ['HTTP', 'http://shop.example.test/products/P-001'],
+    ['relative', '/products/P-001'],
+    ['missing authority separator', 'https:shop.example.test/products/P-001'],
+    ['javascript', 'javascript:alert(1)'],
+    ['data', 'data:text/html,unsafe'],
+    ['file', 'file:///products/P-001'],
+    ['credentials', 'https://user:secret@shop.example.test/products/P-001'],
+    ['empty', '   '],
+    ['invalid hostname', 'https://-invalid.example.test/products/P-001'],
+  ])('rejects an unsafe %s ecommerceUrl', (_caseName, ecommerceUrl) => {
+    expect(() =>
+      createCatalogProduct({ ...productInput(), ecommerceUrl }),
+    ).toThrow('Catalog product ecommerceUrl must be a safe HTTPS URL');
+  });
+
   it('creates a normalized frozen customer price', () => {
     const price = createCustomerPrice(priceInput());
 

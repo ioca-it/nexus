@@ -20,6 +20,7 @@ export interface CatalogProductRecord {
   readonly categoryId?: string;
   readonly imageReference?: string;
   readonly unitOfMeasureCode?: string;
+  readonly ecommerceUrl?: string;
   readonly active: boolean;
 }
 
@@ -45,6 +46,7 @@ export interface DataverseCatalogProductSchema {
     readonly categoryId: string;
     readonly imageReference: string;
     readonly unitOfMeasureCode: string;
+    readonly ecommerceUrl: string;
     readonly active: string;
   };
 }

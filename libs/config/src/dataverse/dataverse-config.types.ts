@@ -1,3 +1,6 @@
+import type { OrdersDataverseSchemaConfig } from './orders-config.types';
+export type { OrdersDataverseSchemaConfig } from './orders-config.types';
+
 export interface PaymentNotificationDataverseSchemaConfig {
   readonly notificationEntitySet: string;
   readonly invoiceEntitySet: string;
@@ -80,6 +83,7 @@ export interface CommercialCatalogDataverseSchemaConfig {
       readonly categoryId: string;
       readonly imageReference: string;
       readonly unitOfMeasureCode: string;
+      readonly ecommerceUrl: string;
       readonly active: string;
     };
   };
@@ -116,4 +120,5 @@ export interface DataverseConfig {
   readonly commercialCatalog: {
     readonly schema: CommercialCatalogDataverseSchemaConfig;
   };
+  readonly orders: { readonly schema: OrdersDataverseSchemaConfig };
 }

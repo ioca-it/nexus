@@ -12,12 +12,16 @@ authoritative sources for catalog behavior.
 | `GET /commercial-catalog/products/:productId` | `GET_CUSTOMER_CATALOG_ITEM_USE_CASE` → `toCatalogItemResponse()` |
 | Product gateway                               | `config.dataverse.commercialCatalog.schema.product`              |
 | Customer price gateway                        | `config.dataverse.commercialCatalog.schema.customerPrice`        |
+| Optional ecommerce URL response               | `CatalogProduct.ecommerceUrl` → `CatalogProductResponse`         |
 
 Only the two use-case tokens are exported. The Dataverse client, gateways,
 repositories, clock, access-token provider, and schemas remain internal.
 `controllers/commercial-catalog.controller.ts` delegates only to those use
 cases. HTTP responses deliberately exclude customer and internal price IDs,
 active flags, permissions, inventory, availability, costs, margins, and taxes.
+The optional informational ecommerce URL is copied exactly from the validated
+Domain product into both existing endpoint responses. The API generates no
+HTML, enriched link, or tracking parameter.
 
 To add a use case, add its token and provider, then export it only when another
 module must consume it. Add repository composition in
@@ -26,3 +30,9 @@ module must consume it. Add repository composition in
 Add a query through Application and then expose it from the controller.
 Inventory remains pending and must be connected separately only after its
 approved Business Central API and application contracts exist.
+
+Dataverse is authoritative for `ecommerceUrl`; Business Central and Orders do
+not store or supply it. In particular, `OrderLine` and the order catalog
+snapshot deliberately exclude it. Change URL policy only through the Commercial
+Catalog Domain validator, Dataverse validator, response contract/mapper, and
+their tests.

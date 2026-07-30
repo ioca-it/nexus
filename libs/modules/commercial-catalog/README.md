@@ -16,6 +16,7 @@ of these models or use cases.
 | Concern                             | Authoritative files                                            |
 | ----------------------------------- | -------------------------------------------------------------- |
 | Product model and fields            | `domain/product.ts`                                            |
+| Ecommerce URL safety policy         | `domain/safe-ecommerce-url.ts`                                 |
 | Customer price model and invariants | `domain/customer-price.ts`                                     |
 | Product-price relationship          | `domain/catalog-item.ts`                                       |
 | Product and price persistence ports | `domain/repositories/`                                         |
@@ -28,6 +29,8 @@ of these models or use cases.
 Frozen boundaries:
 
 - products and customer prices come from Dataverse;
+- Dataverse supplies the optional ecommerce URL exactly as stored after HTTPS
+  safety validation; NEXUS never constructs or enriches it;
 - customer identity always comes from `AuthenticatedActor.customerId`;
 - only explicit permissions authorize reads; roles and `Nexus.Admin` do not;
 - products without an active authorized customer price are not visible;
@@ -40,3 +43,9 @@ invariant and repository contract. New query cases belong in
 `application/use-cases`; concrete Dataverse code belongs only in
 `infrastructure`. Inventory must remain a separate Business Central concern
 until its approved contract is composed later.
+
+`CatalogProduct.ecommerceUrl` is informational and intentionally excluded from
+Orders, `OrderLine`, and the persisted catalog snapshot. The future order form
+must read it from Commercial Catalog. If URL policy changes, update
+`domain/safe-ecommerce-url.ts`, the Dataverse validator, response mapper,
+documentation, and their focused tests together.

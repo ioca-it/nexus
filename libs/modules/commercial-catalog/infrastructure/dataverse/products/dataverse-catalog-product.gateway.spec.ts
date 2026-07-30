@@ -15,6 +15,7 @@ const schema = Object.freeze({
     categoryId: 'configured_category',
     imageReference: 'configured_image',
     unitOfMeasureCode: 'configured_uom',
+    ecommerceUrl: 'configured_ecommerce_url',
     active: 'configured_active',
   }),
 });
@@ -27,6 +28,8 @@ const activePhysicalRecord = Object.freeze({
   configured_category: ' Category ',
   configured_image: ' Image ',
   configured_uom: ' EA ',
+  configured_ecommerce_url:
+    ' https://shop.example.test/products/P-001?view=full ',
   configured_active: true,
   unused_price: 99,
 });
@@ -66,6 +69,7 @@ describe('DataverseCatalogProductGateway', () => {
       categoryId: 'Category',
       imageReference: 'Image',
       unitOfMeasureCode: 'EA',
+      ecommerceUrl: 'https://shop.example.test/products/P-001?view=full',
       active: true,
     });
     expect(result).not.toHaveProperty('unused_price');
@@ -114,6 +118,7 @@ describe('DataverseCatalogProductGateway', () => {
     ['configured_id', '   '],
     ['configured_number', undefined],
     ['configured_name', 100],
+    ['configured_ecommerce_url', 100],
     ['configured_active', 'true'],
   ])('rejects an invalid configured field %s', async (fieldName, value) => {
     const { gateway } = setup({
@@ -133,6 +138,7 @@ describe('DataverseCatalogProductGateway', () => {
       ...activePhysicalRecord,
       configured_description: '   ',
       configured_category: undefined,
+      configured_ecommerce_url: '   ',
     });
     const snapshot = { ...physicalRecord };
     const { gateway } = setup({
@@ -143,6 +149,77 @@ describe('DataverseCatalogProductGateway', () => {
 
     expect(result).not.toHaveProperty('description');
     expect(result).not.toHaveProperty('categoryId');
+    expect(result).not.toHaveProperty('ecommerceUrl');
+    expect(physicalRecord).toEqual(snapshot);
+  });
+
+  it.each([undefined, null, '', '   '])(
+    'normalizes an absent or empty ecommerce value %p to undefined',
+    async (value) => {
+      const physicalRecord = Object.freeze({
+        ...activePhysicalRecord,
+        configured_ecommerce_url: value,
+      });
+      const { gateway } = setup({
+        findOne: jest.fn().mockResolvedValue(physicalRecord),
+      });
+
+      const result = await gateway.findById(
+        createCatalogProductId('product-1'),
+      );
+
+      expect(result).not.toHaveProperty('ecommerceUrl');
+    },
+  );
+
+  it.each([
+    'http://shop.example.test/products/P-001',
+    '/products/P-001',
+    'javascript:alert(1)',
+    'data:text/html,unsafe',
+    'https://user:secret@shop.example.test/products/P-001',
+  ])(
+    'rejects unsafe ecommerce URL %s without exposing the record',
+    async (value) => {
+      const physicalRecord = Object.freeze({
+        ...activePhysicalRecord,
+        configured_ecommerce_url: value,
+        confidential_value: 'must-not-appear',
+      });
+      const { gateway } = setup({
+        findOne: jest.fn().mockResolvedValue(physicalRecord),
+      });
+
+      let failure: unknown;
+
+      try {
+        await gateway.findById(createCatalogProductId('product-1'));
+      } catch (error) {
+        failure = error;
+      }
+
+      expect(failure).toBeInstanceOf(Error);
+      expect((failure as Error).message).toContain(
+        '"configured_ecommerce_url"',
+      );
+      expect((failure as Error).message).not.toContain('must-not-appear');
+    },
+  );
+
+  it('uses only the configured ecommerce field and does not modify the physical record', async () => {
+    const physicalRecord = Object.freeze({
+      ...activePhysicalRecord,
+      configured_ecommerce_url: ' https://shop.example.test/configured ',
+      ecommerceUrl: 'https://shop.example.test/unconfigured',
+    });
+    const snapshot = { ...physicalRecord };
+    const { gateway } = setup({
+      findOne: jest.fn().mockResolvedValue(physicalRecord),
+    });
+
+    const result = await gateway.findById(createCatalogProductId('product-1'));
+
+    expect(result?.ecommerceUrl).toBe('https://shop.example.test/configured');
     expect(physicalRecord).toEqual(snapshot);
   });
 

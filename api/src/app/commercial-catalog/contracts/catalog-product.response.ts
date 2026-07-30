@@ -6,4 +6,5 @@ export interface CatalogProductResponse {
   readonly categoryId?: string;
   readonly imageReference?: string;
   readonly unitOfMeasureCode?: string;
+  readonly ecommerceUrl?: string;
 }
