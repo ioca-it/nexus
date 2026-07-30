@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../../dist/out-tsc",
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "jest.config.cts",
+    "index.ts",
+    "domain/**/*.test.ts",
+    "domain/**/*.spec.ts",
+    "domain/**/*.d.ts",
+    "application/**/*.test.ts",
+    "application/**/*.spec.ts",
+    "application/**/*.d.ts"
+  ]
+}

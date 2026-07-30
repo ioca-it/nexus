@@ -81,6 +81,43 @@ nombres físicos reales y cualquier valor productivo deben permanecer en la
 configuración segura del entorno. No deben almacenarse secretos ni valores
 productivos en archivos versionados.
 
+## Commercial Catalog Dataverse schema
+
+Dataverse es la fuente autorizada de productos y precios asignados por cliente.
+El schema configura exclusivamente sus nombres físicos; el inventario pertenece
+a Business Central y queda fuera de esta configuración. Todas las variables son
+obligatorias, no tienen valores predeterminados y deben suministrarse por
+entorno:
+
+```dotenv
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_ENTITY_SET=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ID=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NUMBER=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NAME=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_DESCRIPTION=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_CATEGORY_ID=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE=
+DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE=
+
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_ENTITY_SET=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ID=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CUSTOMER_ID=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_PRODUCT_ID=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CURRENCY_CODE=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_UNIT_PRICE=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_MINIMUM_QUANTITY=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_FROM=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_TO=
+DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ACTIVE=
+```
+
+Los nombres reales de entity sets y columnas permanecen pendientes para cada
+entorno. Para agregar un campo físico, deben actualizarse conjuntamente
+`dataverse-config.types.ts`, `dataverse-config.validator.ts`,
+`dataverse-config.loader.ts` y las pruebas específicas del schema. No deben
+incorporarse nombres productivos ni secretos al repositorio.
+
 ## Payment Notifications approval groups
 
 Cada acción con aprobación requiere su propia lista de identificadores de

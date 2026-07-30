@@ -69,6 +69,36 @@ export interface FinanceCustomerReferenceDataverseSchemaConfig {
   };
 }
 
+export interface CommercialCatalogDataverseSchemaConfig {
+  readonly product: {
+    readonly entitySet: string;
+    readonly fields: {
+      readonly id: string;
+      readonly number: string;
+      readonly name: string;
+      readonly description: string;
+      readonly categoryId: string;
+      readonly imageReference: string;
+      readonly unitOfMeasureCode: string;
+      readonly active: string;
+    };
+  };
+  readonly customerPrice: {
+    readonly entitySet: string;
+    readonly fields: {
+      readonly id: string;
+      readonly customerId: string;
+      readonly productId: string;
+      readonly currencyCode: string;
+      readonly unitPrice: string;
+      readonly minimumQuantity: string;
+      readonly validFrom: string;
+      readonly validTo: string;
+      readonly active: string;
+    };
+  };
+}
+
 export interface DataverseConfig {
   readonly environmentUrl: string;
   readonly apiVersion: string;
@@ -82,5 +112,8 @@ export interface DataverseConfig {
     readonly customerReference: {
       readonly schema: FinanceCustomerReferenceDataverseSchemaConfig;
     };
+  };
+  readonly commercialCatalog: {
+    readonly schema: CommercialCatalogDataverseSchemaConfig;
   };
 }

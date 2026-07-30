@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { HealthModule } from '../health/health.module';
 import { AuthModule } from '../auth';
 import { AuthenticatedActorModule } from './authenticated-actor';
+import { CommercialCatalogModule } from './commercial-catalog';
 import { FinanceModule } from './finance';
 import { PaymentNotificationsModule } from './payment-notifications';
 
@@ -15,6 +16,7 @@ import { PaymentNotificationsModule } from './payment-notifications';
     PaymentNotificationsModule,
     AuthenticatedActorModule,
     FinanceModule,
+    CommercialCatalogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

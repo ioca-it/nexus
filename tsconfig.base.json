@@ -18,6 +18,9 @@
       "@nexus/config": ["./libs/config/src/index.ts"],
       "@nexus/config/auth": ["./libs/config/src/auth/index.ts"],
       "@nexus/platform": ["./libs/platform/index.ts"],
+      "@nexus/modules/commercial-catalog": [
+        "./libs/modules/commercial-catalog/index.ts"
+      ],
       "@nexus/modules/finance": ["./libs/modules/finance/index.ts"],
       "@nexus/modules/payment-notifications": [
         "./libs/modules/payment-notifications/domain/index.ts"

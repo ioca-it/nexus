@@ -1,4 +1,5 @@
 export { DataverseModule } from './dataverse.module';
+export { FetchDataverseClient } from '@nexus/modules/payment-notifications/infrastructure';
 export {
   AZURE_ACCESS_TOKEN_PROVIDER,
   DATAVERSE_ACCESS_TOKEN_PROVIDER,

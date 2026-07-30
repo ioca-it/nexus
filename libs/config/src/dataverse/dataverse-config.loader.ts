@@ -2,6 +2,7 @@ import { readEnvironmentVariable } from '../server/environment-reader';
 import type { EnvironmentVariables } from '../shared/environment-variables';
 import type {
   AuthenticatedActorDataverseSchemaConfig,
+  CommercialCatalogDataverseSchemaConfig,
   DataverseConfig,
   FinanceCustomerReferenceDataverseSchemaConfig,
   PaymentNotificationDataverseSchemaConfig,
@@ -93,6 +94,44 @@ export const loadDataverseConfig = (
       }),
     });
 
+  const commercialCatalogSchema: CommercialCatalogDataverseSchemaConfig =
+    Object.freeze({
+      product: Object.freeze({
+        entitySet: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_ENTITY_SET,
+        fields: Object.freeze({
+          id: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ID,
+          number: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NUMBER,
+          name: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NAME,
+          description:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_DESCRIPTION,
+          categoryId:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_CATEGORY_ID,
+          imageReference:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE,
+          unitOfMeasureCode:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE,
+          active: values.DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE,
+        }),
+      }),
+      customerPrice: Object.freeze({
+        entitySet: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_ENTITY_SET,
+        fields: Object.freeze({
+          id: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ID,
+          customerId:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CUSTOMER_ID,
+          productId: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_PRODUCT_ID,
+          currencyCode:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CURRENCY_CODE,
+          unitPrice: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_UNIT_PRICE,
+          minimumQuantity:
+            values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_MINIMUM_QUANTITY,
+          validFrom: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_FROM,
+          validTo: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_TO,
+          active: values.DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ACTIVE,
+        }),
+      }),
+    });
+
   return Object.freeze({
     environmentUrl: values.DATAVERSE_ENVIRONMENT_URL,
     apiVersion:
@@ -108,6 +147,9 @@ export const loadDataverseConfig = (
       customerReference: Object.freeze({
         schema: financeCustomerReferenceSchema,
       }),
+    }),
+    commercialCatalog: Object.freeze({
+      schema: commercialCatalogSchema,
     }),
   });
 };

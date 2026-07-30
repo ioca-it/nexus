@@ -1,0 +1,18 @@
+{
+  "name": "commercial-catalog",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/modules/commercial-catalog",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/modules/commercial-catalog",
+        "main": "libs/modules/commercial-catalog/index.ts",
+        "tsConfig": "libs/modules/commercial-catalog/tsconfig.lib.json"
+      }
+    }
+  }
+}

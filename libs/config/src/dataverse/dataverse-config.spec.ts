@@ -105,6 +105,32 @@ const validDataverseEnvironment: EnvironmentVariables = Object.freeze({
   DATAVERSE_FINANCE_CUSTOMER_FIELD_BUSINESS_CENTRAL_CUSTOMER_ID:
     'test_finance_business_central_customer_id',
   DATAVERSE_FINANCE_CUSTOMER_FIELD_ACTIVE: 'test_finance_customer_active',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_ENTITY_SET: 'test_catalog_products',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ID: 'test_product_id',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NUMBER: 'test_product_number',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_NAME: 'test_product_name',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_DESCRIPTION:
+    'test_product_description',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_CATEGORY_ID:
+    'test_product_category_id',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_IMAGE_REFERENCE:
+    'test_product_image_reference',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_UNIT_OF_MEASURE_CODE:
+    'test_product_unit_of_measure_code',
+  DATAVERSE_COMMERCIAL_CATALOG_PRODUCT_FIELD_ACTIVE: 'test_product_active',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_ENTITY_SET: 'test_catalog_customer_prices',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ID: 'test_price_id',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CUSTOMER_ID:
+    'test_price_customer_id',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_PRODUCT_ID: 'test_price_product_id',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_CURRENCY_CODE:
+    'test_price_currency_code',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_UNIT_PRICE: 'test_price_unit_price',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_MINIMUM_QUANTITY:
+    'test_price_minimum_quantity',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_FROM: 'test_price_valid_from',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_VALID_TO: 'test_price_valid_to',
+  DATAVERSE_COMMERCIAL_CATALOG_PRICE_FIELD_ACTIVE: 'test_price_active',
 });
 
 const completeApplicationEnvironment: EnvironmentVariables = Object.freeze({
