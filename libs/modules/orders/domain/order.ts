@@ -133,8 +133,11 @@ export class Order {
   }
 
   replaceLines(lines: readonly OrderLine[], updatedAt: Date): Order {
-    if (this.status !== ORDER_STATUS.DRAFT) {
-      throw new Error('Order lines can only be replaced while DRAFT');
+    if (
+      this.status !== ORDER_STATUS.DRAFT &&
+      this.status !== ORDER_STATUS.CHANGES_REQUESTED
+    ) {
+      throw new Error('Order lines can only be replaced while editable');
     }
 
     const nextUpdatedAt = copyDate(updatedAt, 'Order updatedAt');
@@ -149,6 +152,22 @@ export class Order {
       status: this.status,
       currencyCode: this.currencyCode,
       lines: copyLines(lines, this.currencyCode),
+      createdAt: new Date(this.createdAtValue.getTime()),
+      updatedAt: nextUpdatedAt,
+    });
+  }
+
+  transitionTo(status: OrderStatus, updatedAt: Date): Order {
+    const nextUpdatedAt = copyDate(updatedAt, 'Order updatedAt');
+    if (nextUpdatedAt.getTime() < this.createdAtValue.getTime()) {
+      throw new Error('Order updatedAt cannot precede createdAt');
+    }
+    return new Order({
+      id: this.id,
+      customerId: this.customerId,
+      status,
+      currencyCode: this.currencyCode,
+      lines: copyLines(this.lines, this.currencyCode),
       createdAt: new Date(this.createdAtValue.getTime()),
       updatedAt: nextUpdatedAt,
     });

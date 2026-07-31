@@ -7,3 +7,4 @@ export * from './services';
 export * from './business-central';
 export * from './dataverse';
 export * from './payment-notifications';
+export * from './orders';

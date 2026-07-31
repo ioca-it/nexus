@@ -9,3 +9,5 @@ export {
   type OrderPermissionAction,
 } from './security';
 export * from './use-cases';
+export * from './workflow';
+export * from './process';

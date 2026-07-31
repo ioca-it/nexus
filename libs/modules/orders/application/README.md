@@ -7,4 +7,11 @@ line snapshot.
 
 Create persists an empty draft. Update replaces all lines atomically after all
 catalog resolutions succeed. Read cases enforce permission and ownership.
-There is no inventory, workflow, HTTP, framework, or concrete persistence code.
+The approved workflow definition is centralized under `workflow/`.
+`SubmitOrderUseCase` implements only `DRAFT` to `SUBMITTED` through the shared
+process factory and Platform `StateTransition`. `ResubmitOrderUseCase` implements
+only `CHANGES_REQUESTED` to `SUBMITTED` with `orders.resubmit`. There is no
+`StartReviewOrderUseCase` implements only `SUBMITTED` to `UNDER_REVIEW` with
+`orders.start_review`; it does not require actor customer context or ownership.
+There is no inventory, HTTP, framework, ERP, or concrete persistence code in
+Application.

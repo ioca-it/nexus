@@ -118,34 +118,86 @@ describe('evaluateOrderAccess', () => {
     ).toBe(false);
   });
 
-  it('requires customer context only when requested', () => {
+  it('separates customer context from resource ownership', () => {
     const administrativeActor = actor({
       customerId: null,
-      permissions: [permission(ORDERS_PERMISSION_ACTIONS.READ_ORDERS)],
+      permissions: [permission(ORDERS_PERMISSION_ACTIONS.START_REVIEW)],
     });
 
     expect(
       evaluateOrderAccess({
         actor: administrativeActor,
-        action: ORDERS_PERMISSION_ACTIONS.READ_ORDERS,
+        action: ORDERS_PERMISSION_ACTIONS.START_REVIEW,
         requireCustomer: true,
       }).allowed,
     ).toBe(false);
     expect(
       evaluateOrderAccess({
         actor: administrativeActor,
-        action: ORDERS_PERMISSION_ACTIONS.READ_ORDERS,
+        action: ORDERS_PERMISSION_ACTIONS.START_REVIEW,
         resourceCustomerId: createOrderCustomerId('customer-1'),
+        requireCustomer: false,
+        requireOwnership: false,
       }).allowed,
     ).toBe(true);
   });
 
-  it('exports exactly the three approved permission actions', () => {
+  it('defaults resource access to conservative ownership enforcement', () => {
+    const differentCustomer = actor({
+      customerId: 'customer-2',
+      permissions: [permission(ORDERS_PERMISSION_ACTIONS.START_REVIEW)],
+    });
+
+    expect(
+      evaluateOrderAccess({
+        actor: differentCustomer,
+        action: ORDERS_PERMISSION_ACTIONS.START_REVIEW,
+        resourceCustomerId: createOrderCustomerId('customer-1'),
+      }).allowed,
+    ).toBe(false);
+
+    const actorWithoutCustomer = actor({
+      customerId: null,
+      permissions: [permission(ORDERS_PERMISSION_ACTIONS.START_REVIEW)],
+    });
+    expect(
+      evaluateOrderAccess({
+        actor: actorWithoutCustomer,
+        action: ORDERS_PERMISSION_ACTIONS.START_REVIEW,
+        resourceCustomerId: createOrderCustomerId('customer-1'),
+      }).allowed,
+    ).toBe(false);
+  });
+
+  it('allows an administrative action without ownership when explicitly requested', () => {
+    const differentCustomer = actor({
+      customerId: 'customer-2',
+      permissions: [permission(ORDERS_PERMISSION_ACTIONS.START_REVIEW)],
+    });
+
+    expect(
+      evaluateOrderAccess({
+        actor: differentCustomer,
+        action: ORDERS_PERMISSION_ACTIONS.START_REVIEW,
+        resourceCustomerId: createOrderCustomerId('customer-1'),
+        requireCustomer: false,
+        requireOwnership: false,
+      }).allowed,
+    ).toBe(true);
+  });
+
+  it('exports exactly the approved permission actions', () => {
     expect(ORDERS_PERMISSION_MODULE).toBe('orders');
     expect(ORDERS_PERMISSION_ACTIONS).toEqual({
       CREATE_DRAFT: 'create_draft',
       UPDATE_DRAFT: 'update_draft',
       READ_ORDERS: 'read_orders',
+      SUBMIT: 'submit',
+      RESUBMIT: 'resubmit',
+      START_REVIEW: 'start_review',
+      REQUEST_CHANGES: 'request_changes',
+      REJECT: 'reject',
+      APPROVE: 'approve',
     });
     expect(Object.isFrozen(ORDERS_PERMISSION_ACTIONS)).toBe(true);
   });

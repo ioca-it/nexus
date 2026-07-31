@@ -192,6 +192,21 @@ Run `nx build config` to build the library.
 
 Run `nx test config` to execute the unit tests via [Jest](https://jestjs.io).
 
+## Orders approval groups
+
+Orders uses independent environment lists for approval actions. Values are
+comma-separated, trimmed and deduplicated by the Orders loader:
+
+```dotenv
+ORDERS_REQUEST_CHANGES_APPROVAL_GROUP_IDS=
+ORDERS_REJECT_APPROVAL_GROUP_IDS=
+ORDERS_APPROVE_APPROVAL_GROUP_IDS=
+```
+
+The validator and loader under `src/orders/` are the authoritative boundaries.
+No IDs or defaults are committed; Config supplies groups while the Orders
+module owns the workflow definition.
+
 ## Orders Dataverse Schema
 
 Orders configuration defines configurable entity sets and fields for Orders and OrderLines. Dataverse is the authorized source; Commercial Catalog remains the source for products/prices and Business Central remains reserved for future inventory. To add a field, update orders-config.types.ts, loader, validator environment list, tests, and the Orders infrastructure schema adapter. Physical names remain environment-owned and are never documented here.

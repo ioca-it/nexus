@@ -11,6 +11,12 @@ export const ORDERS_PERMISSION_ACTIONS = Object.freeze({
   CREATE_DRAFT: 'create_draft',
   UPDATE_DRAFT: 'update_draft',
   READ_ORDERS: 'read_orders',
+  SUBMIT: 'submit',
+  RESUBMIT: 'resubmit',
+  START_REVIEW: 'start_review',
+  REQUEST_CHANGES: 'request_changes',
+  REJECT: 'reject',
+  APPROVE: 'approve',
 } as const);
 
 export type OrderPermissionAction =
@@ -21,6 +27,7 @@ export interface OrderAccessRequest {
   readonly action: OrderPermissionAction;
   readonly resourceCustomerId?: OrderCustomerId;
   readonly requireCustomer?: boolean;
+  readonly requireOwnership?: boolean;
 }
 
 export type OrderAccessDecision = Readonly<PermissionDecision>;
@@ -50,12 +57,18 @@ export function evaluateOrderAccess(
     return decision(false, CUSTOMER_REQUIRED_REASON);
   }
 
-  if (
-    request.resourceCustomerId !== undefined &&
-    request.actor.customerId !== null &&
-    request.actor.customerId !== request.resourceCustomerId
-  ) {
-    return decision(false, CUSTOMER_MISMATCH_REASON);
+  const ownershipRequired =
+    request.requireOwnership ?? request.resourceCustomerId !== undefined;
+
+  // Opti ChatGPT: separación explícita de contexto de cliente y propiedad para evitar evaluaciones ambiguas.
+  if (ownershipRequired) {
+    if (
+      request.resourceCustomerId === undefined ||
+      request.actor.customerId === null ||
+      request.actor.customerId !== request.resourceCustomerId
+    ) {
+      return decision(false, CUSTOMER_MISMATCH_REASON);
+    }
   }
 
   return decision(true, ACCESS_ALLOWED_REASON);

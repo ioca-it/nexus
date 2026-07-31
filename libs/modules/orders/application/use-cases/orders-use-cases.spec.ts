@@ -601,7 +601,7 @@ describe('Orders read use cases', () => {
     expect(otherRepository.findById).toHaveBeenCalledTimes(1);
   });
 
-  it('Get permits an administrative actor only with explicit permission', async () => {
+  it('Get requires customer ownership even with explicit permission', async () => {
     const existing = order();
     const repo = repository({
       findById: jest.fn().mockResolvedValue(existing),
@@ -617,7 +617,7 @@ describe('Orders read use cases', () => {
         }),
         id: ids.order,
       }),
-    ).resolves.toBe(existing);
+    ).rejects.toThrow('Order access denied');
     await expect(
       useCase.execute({
         actor: actor({ customerId: null, roles: ['Nexus.Admin'] }),

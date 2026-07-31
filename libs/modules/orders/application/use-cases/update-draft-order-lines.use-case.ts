@@ -61,7 +61,10 @@ export class UpdateDraftOrderLinesUseCase {
       resourceCustomerId: order.customerId,
     });
 
-    if (order.status !== ORDER_STATUS.DRAFT) {
+    if (
+      order.status !== ORDER_STATUS.DRAFT &&
+      order.status !== ORDER_STATUS.CHANGES_REQUESTED
+    ) {
       throw new Error('Order lines can only be updated while DRAFT');
     }
 

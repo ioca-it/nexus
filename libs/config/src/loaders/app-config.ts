@@ -1,6 +1,7 @@
 import { loadBusinessCentralConfig } from '../business-central/business-central-config.loader';
 import { loadDataverseConfig } from '../dataverse/dataverse-config.loader';
 import { loadPaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.loader';
+import { loadOrdersConfig } from '../orders/orders-config.loader';
 import type { NexusConfig } from '../types/config.types';
 import { envLoader } from './env-loader';
 
@@ -24,4 +25,9 @@ export const loadAppConfig = (): NexusConfig => ({
   dataverse: loadDataverseConfig(),
   businessCentral: loadBusinessCentralConfig(),
   paymentNotifications: loadPaymentNotificationsConfig(),
+  ...(process.env['ORDERS_REQUEST_CHANGES_APPROVAL_GROUP_IDS'] &&
+  process.env['ORDERS_REJECT_APPROVAL_GROUP_IDS'] &&
+  process.env['ORDERS_APPROVE_APPROVAL_GROUP_IDS']
+    ? { orders: loadOrdersConfig() }
+    : {}),
 });

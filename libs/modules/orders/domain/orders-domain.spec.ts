@@ -247,19 +247,37 @@ describe('Order', () => {
     expect(original.subtotal).toBe(7.01);
   });
 
-  it('defines no unapproved status and no transitionTo operation', () => {
+  it('defines exactly the approved statuses and transition operation', () => {
     const statusSource = readFileSync(
       join(__dirname, 'order-status.ts'),
       'utf8',
     );
     const orderSource = readFileSync(join(__dirname, 'order.ts'), 'utf8');
 
-    expect(ORDER_STATUS).toEqual({ DRAFT: 'DRAFT' });
-    expect(statusSource).not.toMatch(
-      /SUBMITTED|CONFIRMED|PROCESSING|SHIPPED|CANCELLED/,
+    expect(ORDER_STATUS).toEqual({
+      DRAFT: 'DRAFT',
+      SUBMITTED: 'SUBMITTED',
+      UNDER_REVIEW: 'UNDER_REVIEW',
+      CHANGES_REQUESTED: 'CHANGES_REQUESTED',
+      REJECTED: 'REJECTED',
+      APPROVED: 'APPROVED',
+    });
+    expect(statusSource).not.toMatch(/CONFIRMED|PROCESSING|SHIPPED|CANCELLED/);
+    expect(orderSource).toMatch(/transitionTo/);
+    expect(order()).toHaveProperty('transitionTo');
+  });
+
+  it('transitions immutably without changing the commercial snapshot', () => {
+    const original = order();
+    const transitioned = original.transitionTo(
+      ORDER_STATUS.SUBMITTED,
+      new Date('2026-07-30T11:00:00.000Z'),
     );
-    expect(orderSource).not.toMatch(/transitionTo/);
-    expect(order()).not.toHaveProperty('transitionTo');
+    expect(transitioned.status).toBe(ORDER_STATUS.SUBMITTED);
+    expect(transitioned.lines).toEqual(original.lines);
+    expect(transitioned.subtotal).toBe(original.subtotal);
+    expect(original.status).toBe(ORDER_STATUS.DRAFT);
+    expect(Object.isFrozen(transitioned)).toBe(true);
   });
 
   it('does not accept subtotal or non-approved concerns in create input', () => {

@@ -1,6 +1,7 @@
 import type { BusinessCentralConfig } from '../business-central/business-central-config.types';
 import type { DataverseConfig } from '../dataverse/dataverse-config.types';
 import type { PaymentNotificationsConfig } from '../payment-notifications/payment-notifications-config.types';
+import type { OrdersConfig } from '../orders/orders-config.types';
 
 export interface AzureConfig {
   tenantId: string;
@@ -42,4 +43,5 @@ export interface NexusConfig {
   dataverse: NexusDataverseConfig;
   businessCentral: BusinessCentralConfig;
   readonly paymentNotifications?: PaymentNotificationsConfig;
+  readonly orders?: OrdersConfig;
 }
